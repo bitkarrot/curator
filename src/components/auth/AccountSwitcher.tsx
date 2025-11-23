@@ -1,7 +1,7 @@
 // NOTE: This file is stable and usually should not be modified.
 // It is important that all functionality in this file is preserved, and should only be modified if explicitly requested.
 
-import { ChevronDown, LogOut, UserIcon, UserPlus, Wallet } from 'lucide-react';
+import { ChevronDown, LogOut, UserIcon, UserPlus, User, Bell, Moon, Sun } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,9 +10,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
-import { WalletModal } from '@/components/WalletModal';
+import { RelaySelector } from '@/components/RelaySelector';
 import { useLoggedInAccounts, type Account } from '@/hooks/useLoggedInAccounts';
+import { useTheme } from '@/hooks/useTheme';
 import { genUserName } from '@/lib/genUserName';
+import { nip19 } from 'nostr-tools';
 
 interface AccountSwitcherProps {
   onAddAccountClick: () => void;
@@ -20,12 +22,21 @@ interface AccountSwitcherProps {
 
 export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
   const { currentUser, otherUsers, setLogin, removeLogin } = useLoggedInAccounts();
+  const { theme, setTheme } = useTheme();
 
   if (!currentUser) return null;
 
-  const getDisplayName = (account: Account): string => {
-    return account.metadata.name ?? genUserName(account.pubkey);
-  }
+  const getDisplayName = (account: Account): string => account.metadata.name ?? genUserName(account.pubkey);
+  
+  // Generate user's profile URL
+  const userProfileUrl = (() => {
+    try {
+      return `/${nip19.npubEncode(currentUser.pubkey)}`;
+    } catch {
+      // Invalid pubkey format, don't show profile link
+      return null;
+    }
+  })();
 
   return (
     <DropdownMenu modal={false}>
@@ -42,6 +53,34 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-56 p-2 animate-scale-in'>
+        {userProfileUrl && (
+          <>
+            <DropdownMenuItem className='flex items-center gap-2 cursor-pointer p-2 rounded-md'>
+              <User className='w-4 h-4' />
+              <span>My Profile</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className='flex items-center gap-2 cursor-pointer p-2 rounded-md'>
+              <Bell className='w-4 h-4' />
+              <span>Notifications</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        <DropdownMenuItem
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className='flex items-center gap-2 cursor-pointer p-2 rounded-md'
+        >
+          {theme === 'light' ? (
+            <Moon className="h-4 w-4" />
+          ) : (
+            <Sun className="h-4 w-4" />
+          )}
+          <span>Switch to {theme === 'light' ? 'dark' : 'light'} theme</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <div className='font-medium text-sm px-2 py-1.5'>Switch Relay</div>
+        <RelaySelector className="w-full" />
+        <DropdownMenuSeparator />
         <div className='font-medium text-sm px-2 py-1.5'>Switch Account</div>
         {otherUsers.map((user) => (
           <DropdownMenuItem
@@ -60,15 +99,6 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        <WalletModal>
-          <DropdownMenuItem
-            className='flex items-center gap-2 cursor-pointer p-2 rounded-md'
-            onSelect={(e) => e.preventDefault()}
-          >
-            <Wallet className='w-4 h-4' />
-            <span>Wallet Settings</span>
-          </DropdownMenuItem>
-        </WalletModal>
         <DropdownMenuItem
           onClick={onAddAccountClick}
           className='flex items-center gap-2 cursor-pointer p-2 rounded-md'
