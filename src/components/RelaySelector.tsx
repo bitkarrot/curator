@@ -26,8 +26,6 @@ const availableRelays = [
   { name: 'HiveTalk', url: 'wss://swarm.hivetalk.org' },
   { name: 'Nostr.NET', url: 'wss://relay.nostr.net' },
   { name: 'Damus', url: 'wss://relay.damus.io' },
-  { name: 'Nostr.Band', url: 'wss://relay.nostr.band' },
-  { name: 'Ditto', url: 'wss://relay.ditto.pub' },
   { name: 'Primal', url: 'wss://relay.primal.net' },
 ];
 

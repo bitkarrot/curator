@@ -32,7 +32,7 @@ const queryClient = new QueryClient({
 });
 
 const defaultConfig: AppConfig = {
-  theme: "light",
+  theme: "dark",
   relayMetadata: {
     relays: [
       { url: 'wss://swarm.hivetalk.org', read: true, write: true },
@@ -47,7 +47,7 @@ const defaultConfig: AppConfig = {
 export function App() {
   return (
     <UnheadProvider head={head}>
-      <AppProvider storageKey="nostr:app-config" defaultConfig={defaultConfig}>
+      <AppProvider storageKey="nostr:app-config-v2" defaultConfig={defaultConfig}>
         <QueryClientProvider client={queryClient}>
           <NostrLoginProvider storageKey='nostr:login'>
             <NostrProvider>

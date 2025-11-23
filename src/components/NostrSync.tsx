@@ -38,16 +38,33 @@ export function NostrSync() {
                 write: !marker || marker === 'write',
               }));
 
-            if (fetchedRelays.length > 0) {
-              console.log('Syncing relay list from Nostr:', fetchedRelays);
-              updateConfig((current) => ({
-                ...current,
-                relayMetadata: {
-                  relays: fetchedRelays,
-                  updatedAt: event.created_at,
-                },
-              }));
-            }
+            // Ensure swarm.hivetalk.org is always the primary relay
+            const defaultRelay = { url: 'wss://swarm.hivetalk.org', read: true, write: true };
+            const otherRelays = fetchedRelays.filter(r => r.url !== 'wss://swarm.hivetalk.org');
+            const finalRelays = [defaultRelay, ...otherRelays];
+            
+            console.log('Syncing relay list from Nostr with swarm.hivetalk.org as primary:', finalRelays);
+            
+            updateConfig((current) => ({
+              ...current,
+              relayMetadata: {
+                relays: finalRelays,
+                updatedAt: event.created_at,
+              },
+            }));
+          }
+        } else {
+          // No relay list found, ensure we have the default relay
+          console.log('No relay list found in Nostr, ensuring default relay is set');
+          if (!config.relayMetadata.relays.some(r => r.url === 'wss://swarm.hivetalk.org')) {
+            const defaultRelay = { url: 'wss://swarm.hivetalk.org', read: true, write: true };
+            updateConfig((current) => ({
+              ...current,
+              relayMetadata: {
+                relays: [defaultRelay, ...(current.relayMetadata?.relays || [])],
+                updatedAt: current.relayMetadata?.updatedAt || 0,
+              },
+            }));
           }
         }
       } catch (error) {
@@ -56,7 +73,7 @@ export function NostrSync() {
     };
 
     syncRelaysFromNostr();
-  }, [user, config.relayMetadata.updatedAt, nostr, updateConfig]);
+  }, [user, config.relayMetadata.updatedAt, config.relayMetadata.relays, nostr, updateConfig]);
 
   return null;
 }
