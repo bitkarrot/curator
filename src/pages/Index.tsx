@@ -24,12 +24,31 @@ const Index = () => {
   const { config } = useAppContext();
   const { toast } = useToast();
 
+  // Debug user object
+  useEffect(() => {
+    console.log('Current user:', user);
+    console.log('User pubkey:', user?.pubkey);
+  }, [user]);
+
   const [events, setEvents] = useState<NostrEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [kindFilter, setKindFilter] = useState<string>('1');
   const [searchKind, setSearchKind] = useState<string>('1');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newNoteContent, setNewNoteContent] = useState('');
+  const [deletedEventIds, setDeletedEventIds] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem('curator-deleted-events');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  // Persist deleted events to localStorage
+  useEffect(() => {
+    localStorage.setItem('curator-deleted-events', JSON.stringify([...deletedEventIds]));
+  }, [deletedEventIds]);
   
   const currentRelay = config.relayMetadata.relays[0]?.url || 'wss://swarm.hivetalk.org';
   const [limit] = useState(50);
@@ -66,10 +85,14 @@ const Index = () => {
       // Sort by created_at descending
       newEvents.sort((a, b) => b.created_at - a.created_at);
 
+      // Filter out locally deleted events
+      const filteredEvents = newEvents.filter(event => !deletedEventIds.has(event.id));
+      console.log(`Filtered out ${newEvents.length - filteredEvents.length} locally deleted events`);
+
       if (loadMore) {
-        setEvents(prev => [...prev, ...newEvents]);
+        setEvents(prev => [...prev, ...filteredEvents]);
       } else {
-        setEvents(newEvents);
+        setEvents(filteredEvents);
       }
 
       if (newEvents.length > 0) {
@@ -85,7 +108,7 @@ const Index = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentRelay, kindFilter, limit, until, nostr, toast]);
+  }, [currentRelay, kindFilter, limit, until, nostr, toast, deletedEventIds]);
 
   const handleSearch = () => {
     setKindFilter(searchKind);
@@ -126,17 +149,33 @@ const Index = () => {
       return;
     }
 
-    console.log('Attempting to delete event:', eventId);
+    console.log('=== DELETE EVENT PROCESS ===');
+    console.log('Event ID to delete:', eventId);
     console.log('User pubkey:', user.pubkey);
+    console.log('User signer available:', !!user.signer);
+
+    const deleteEventData = {
+      kind: 5,
+      content: 'Deleted',
+      tags: [['e', eventId]],
+    };
+    console.log('Delete event data:', deleteEventData);
 
     try {
-      publishEvent({
-        kind: 5,
-        content: 'Deleted',
-        tags: [['e', eventId]],
-      }, {
-        onSuccess: () => {
-          console.log('Delete event published successfully');
+      publishEvent(deleteEventData, {
+        onSuccess: (signedEvent) => {
+          console.log('✅ Delete event signed and published successfully:', signedEvent);
+          console.log('Signed event ID:', signedEvent.id);
+          console.log('Signed event pubkey:', signedEvent.pubkey);
+          console.log('Signed event signature:', signedEvent.sig);
+          
+          // Track deleted event ID locally for persistence
+          setDeletedEventIds(prev => {
+            const newSet = new Set([...prev, eventId]);
+            console.log(`Added event ${eventId} to deleted list. Total deleted: ${newSet.size}`);
+            return newSet;
+          });
+          
           // Remove the event from local state immediately for better UX
           setEvents(prevEvents => {
             const filtered = prevEvents.filter(e => e.id !== eventId);
@@ -145,20 +184,25 @@ const Index = () => {
           });
           toast({
             title: 'Success',
-            description: 'Event deletion request sent. Note: Some relays may still show the event.',
+            description: 'Event deleted! Kind 5 deletion event sent to relay and event hidden locally.',
           });
         },
         onError: (error) => {
-          console.error('Delete error:', error);
+          console.error('❌ Delete error:', error);
+          console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+          });
           toast({
             title: 'Error',
-            description: 'Failed to send deletion request',
+            description: `Failed to send deletion request: ${error.message}`,
             variant: 'destructive',
           });
         },
       });
     } catch (error) {
-      console.error('Failed to delete event:', error);
+      console.error('❌ Failed to delete event (outer catch):', error);
       toast({
         title: 'Error',
         description: 'Failed to delete event',
@@ -322,7 +366,13 @@ const Index = () => {
                         </Dialog>
                         
                         {/* Delete button - only show for user's own events */}
-                        {user && event.pubkey === user.pubkey && (
+                        {(() => {
+                          const canDelete = user && event.pubkey === user.pubkey;
+                          if (user) {
+                            console.log(`Event ${event.id.substring(0, 8)}... - User: ${user.pubkey.substring(0, 8)}..., Event: ${event.pubkey.substring(0, 8)}..., Can delete: ${canDelete}`);
+                          }
+                          return canDelete;
+                        })() && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button
