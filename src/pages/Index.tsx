@@ -36,7 +36,7 @@ const Index = () => {
   const [until, setUntil] = useState<number | undefined>(undefined);
 
   useSeoMeta({
-    title: 'Nostr Relay Viewer',
+    title: 'Curator - A Nostr Relay Viewer',
     description: 'A Nostr client for viewing and interacting with relay content.',
   });
 
@@ -187,7 +187,7 @@ const Index = () => {
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl sm:text-2xl font-bold truncate">Nostr Relay Viewer</h1>
+            <h1 className="text-xl sm:text-2xl font-bold truncate">Curator - A Nostr Relay Viewer</h1>
             
             <div className="flex items-center gap-2 sm:gap-4">
               {/* Login Area */}
