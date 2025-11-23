@@ -75,7 +75,7 @@ export function AuthorDisplay({ pubkey, showLink = true, size = 'md', className 
         href={profileUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="hover:bg-muted/50 rounded-md p-1 -m-1 transition-colors"
+        className="hover:bg-muted/50 rounded-md transition-colors inline-block"
       >
         {content}
       </a>
