@@ -121,7 +121,13 @@ const Index = () => {
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    if (!user) return;
+    if (!user) {
+      console.error('No user logged in');
+      return;
+    }
+
+    console.log('Attempting to delete event:', eventId);
+    console.log('User pubkey:', user.pubkey);
 
     try {
       publishEvent({
@@ -130,22 +136,34 @@ const Index = () => {
         tags: [['e', eventId]],
       }, {
         onSuccess: () => {
+          console.log('Delete event published successfully');
+          // Remove the event from local state immediately for better UX
+          setEvents(prevEvents => {
+            const filtered = prevEvents.filter(e => e.id !== eventId);
+            console.log(`Removed event from local state. Events before: ${prevEvents.length}, after: ${filtered.length}`);
+            return filtered;
+          });
           toast({
             title: 'Success',
-            description: 'Event deleted successfully!',
+            description: 'Event deletion request sent. Note: Some relays may still show the event.',
           });
-          loadEvents();
         },
-        onError: () => {
+        onError: (error) => {
+          console.error('Delete error:', error);
           toast({
             title: 'Error',
-            description: 'Failed to delete event',
+            description: 'Failed to send deletion request',
             variant: 'destructive',
           });
         },
       });
     } catch (error) {
       console.error('Failed to delete event:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete event',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -244,7 +262,11 @@ const Index = () => {
         {/* Current Filter Info */}
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Showing events of kind:</span>
+            <span className="text-sm text-muted-foreground">Showing</span>
+            <Badge variant="default">{events.length}</Badge>
+            <span className="text-sm text-muted-foreground">
+              {events.length >= limit ? `of ${limit}+ events` : 'events'} of kind:
+            </span>
             <Badge variant="secondary">{kindFilter}</Badge>
           </div>
           <div className="flex items-center gap-2">
