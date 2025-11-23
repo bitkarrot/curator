@@ -107,7 +107,27 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
           <span>Add another account</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => removeLogin(currentUser.id)}
+          onClick={() => {
+            // Clear all login-related localStorage data
+            const keysToRemove = [
+              'nostr:login',
+              'nostr:app-config-v2',
+              'curator-deleted-events',
+              'nwc-connections',
+              'nwc-active-connection',
+              'signup_completed'
+            ];
+            
+            keysToRemove.forEach(key => {
+              localStorage.removeItem(key);
+            });
+            
+            // Also remove the specific login
+            removeLogin(currentUser.id);
+            
+            // Force page reload to ensure clean state
+            window.location.reload();
+          }}
           className='flex items-center gap-2 cursor-pointer p-2 rounded-md text-red-500'
         >
           <LogOut className='w-4 h-4' />
