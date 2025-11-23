@@ -1,6 +1,6 @@
 import { useAuthor } from '@/hooks/useAuthor';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { ExternalLink } from 'lucide-react';
+import { nip19 } from 'nostr-tools';
 
 interface AuthorDisplayProps {
   pubkey: string;
@@ -13,15 +13,15 @@ export function AuthorDisplay({ pubkey, showLink = true, size = 'md', className 
   const { data: authorData, isLoading } = useAuthor(pubkey);
   
   const sizeClasses = {
-    sm: 'h-6 w-6',
-    md: 'h-8 w-8',
-    lg: 'h-10 w-10'
+    sm: 'h-8 w-8',
+    md: 'h-10 w-10',
+    lg: 'h-12 w-12'
   };
 
   const textSizeClasses = {
-    sm: 'text-xs',
-    md: 'text-sm',
-    lg: 'text-base'
+    sm: 'text-sm',
+    md: 'text-base',
+    lg: 'text-lg'
   };
 
   const displayName = authorData?.metadata?.name || 
@@ -35,7 +35,8 @@ export function AuthorDisplay({ pubkey, showLink = true, size = 'md', className 
     ? authorData.metadata.name.substring(0, 2).toUpperCase()
     : pubkey.substring(0, 2).toUpperCase();
 
-  const profileUrl = `https://nostr.at/${pubkey}`;
+  const npub = nip19.npubEncode(pubkey);
+  const profileUrl = `https://nostr.at/${npub}`;
 
   const content = (
     <div className={`flex items-center gap-2 ${className}`}>
@@ -65,10 +66,6 @@ export function AuthorDisplay({ pubkey, showLink = true, size = 'md', className 
           </div>
         )}
       </div>
-      
-      {showLink && (
-        <ExternalLink className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-      )}
     </div>
   );
 

@@ -10,6 +10,7 @@ import { AuthorDisplay } from '@/components/AuthorDisplay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -372,21 +373,41 @@ const Index = () => {
                               <pre className="bg-muted p-4 rounded-md text-xs overflow-auto">
                                 {JSON.stringify(event, null, 2)}
                               </pre>
-                              {user && event.pubkey === user.pubkey && (
-                                <div className="flex justify-end">
-                                  <Button
-                                    variant="destructive"
-                                    onClick={() => handleDeleteEvent(event.id)}
-                                    disabled={isPublishing}
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Delete Event
-                                  </Button>
-                                </div>
-                              )}
                             </div>
                           </DialogContent>
                         </Dialog>
+                        
+                        {/* Delete button - only show for user's own events */}
+                        {user && event.pubkey === user.pubkey && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this event? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteEvent(event.id)}
+                                  disabled={isPublishing}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  {isPublishing ? 'Deleting...' : 'Yes, Delete'}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
                       </div>
                     </div>
                   </CardHeader>
