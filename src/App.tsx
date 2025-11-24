@@ -36,12 +36,13 @@ const defaultConfig: AppConfig = {
   relayMetadata: {
     relays: [
       { url: 'wss://swarm.hivetalk.org', read: true, write: true },
-      { url: 'wss://relay.ditto.pub', read: true, write: true },
+      { url: 'wss://nos.lol', read: true, write: true },
       { url: 'wss://relay.nostr.band', read: true, write: true },
       { url: 'wss://relay.damus.io', read: true, write: true },
     ],
     updatedAt: 0,
   },
+  publishMode: 'current',
 };
 
 export function App() {

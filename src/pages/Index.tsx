@@ -6,6 +6,7 @@ import { useNostrPublish } from '@/hooks/useNostrPublish';
 import { useAppContext } from '@/hooks/useAppContext';
 import { LoginArea } from '@/components/auth/LoginArea';
 import { AuthorDisplay } from '@/components/AuthorDisplay';
+import { PublishModeToggle } from '@/components/PublishModeToggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -234,6 +235,8 @@ const Index = () => {
             <h1 className="text-xl sm:text-2xl font-bold truncate">Curator - A Nostr Relay Viewer</h1>
             
             <div className="flex items-center gap-2 sm:gap-4">
+              {/* Publish Mode Toggle */}
+              {user && <PublishModeToggle />}
               {/* Login Area */}
               <LoginArea />
             </div>
@@ -368,9 +371,9 @@ const Index = () => {
                         {/* Delete button - only show for user's own events */}
                         {(() => {
                           const canDelete = user && event.pubkey === user.pubkey;
-                          if (user) {
-                            console.log(`Event ${event.id.substring(0, 8)}... - User: ${user.pubkey.substring(0, 8)}..., Event: ${event.pubkey.substring(0, 8)}..., Can delete: ${canDelete}`);
-                          }
+                          // if (user) {
+                          //   console.log(`Event ${event.id.substring(0, 8)}... - User: ${user.pubkey.substring(0, 8)}..., Event: ${event.pubkey.substring(0, 8)}..., Can delete: ${canDelete}`);
+                          // }
                           return canDelete;
                         })() && (
                           <AlertDialog>

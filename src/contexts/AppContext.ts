@@ -14,6 +14,8 @@ export interface AppConfig {
   theme: Theme;
   /** NIP-65 relay list metadata */
   relayMetadata: RelayMetadata;
+  /** Publishing mode: 'all' publishes to all write relays, 'current' publishes only to selected relay */
+  publishMode?: 'all' | 'current';
 }
 
 export interface AppContextType {

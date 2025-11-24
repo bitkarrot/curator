@@ -47,7 +47,21 @@ const NostrProvider: React.FC<NostrProviderProps> = (props) => {
         return routes;
       },
       eventRouter(_event: NostrEvent) {
-        // Get write relays from metadata
+        // Check publish mode - default to 'all' for backward compatibility
+        const publishMode = config.publishMode || 'all';
+        
+        if (publishMode === 'current') {
+          // Publish only to the current selected relay (first in list)
+          const currentRelay = relayMetadata.current.relays[0];
+          if (currentRelay && currentRelay.write) {
+            return [currentRelay.url];
+          }
+          // Fallback to first write relay if current doesn't have write permission
+          const firstWriteRelay = relayMetadata.current.relays.find(r => r.write);
+          return firstWriteRelay ? [firstWriteRelay.url] : [];
+        }
+        
+        // Default behavior: publish to all write relays
         const writeRelays = relayMetadata.current.relays
           .filter(r => r.write)
           .map(r => r.url);
