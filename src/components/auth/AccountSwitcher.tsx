@@ -81,7 +81,7 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
         <div className='font-medium text-sm px-2 py-1.5'>Switch Relay</div>
         <RelaySelector className="w-full" />
         <DropdownMenuSeparator />
-        <div className='font-medium text-sm px-2 py-1.5'>Switch Account</div>
+        {/* <div className='font-medium text-sm px-2 py-1.5'>Switch Account</div>
         {otherUsers.map((user) => (
           <DropdownMenuItem
             key={user.id}
@@ -105,7 +105,7 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
         >
           <UserPlus className='w-4 h-4' />
           <span>Add another account</span>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuItem
           onClick={() => {
             // Clear all login-related localStorage data
