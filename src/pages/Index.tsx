@@ -235,8 +235,6 @@ const Index = () => {
             <h1 className="text-xl sm:text-2xl font-bold truncate">Curator - A Nostr Relay Viewer</h1>
             
             <div className="flex items-center gap-2 sm:gap-4">
-              {/* Publish Mode Toggle */}
-              {user && <PublishModeToggle />}
               {/* Login Area */}
               <LoginArea />
             </div>
@@ -291,6 +289,7 @@ const Index = () => {
                       onChange={(e) => setNewNoteContent(e.target.value)}
                       rows={4}
                     />
+                    <PublishModeToggle />
                     <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
                       <Button variant="outline" onClick={() => setShowCreateDialog(false)} className="w-full sm:w-auto">
                         Cancel

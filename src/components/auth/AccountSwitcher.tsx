@@ -55,14 +55,14 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
       <DropdownMenuContent className='w-56 p-2 animate-scale-in'>
         {userProfileUrl && (
           <>
-            <DropdownMenuItem className='flex items-center gap-2 cursor-pointer p-2 rounded-md'>
+            {/* <DropdownMenuItem className='flex items-center gap-2 cursor-pointer p-2 rounded-md'>
               <User className='w-4 h-4' />
               <span>My Profile</span>
             </DropdownMenuItem>
             <DropdownMenuItem className='flex items-center gap-2 cursor-pointer p-2 rounded-md'>
               <Bell className='w-4 h-4' />
               <span>Notifications</span>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DropdownMenuSeparator />
           </>
         )}
