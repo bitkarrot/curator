@@ -56,7 +56,7 @@ const Index = () => {
   const [until, setUntil] = useState<number | undefined>(undefined);
 
   useSeoMeta({
-    title: 'Curator - A Nostr Relay Viewer',
+    title: 'Curator',
     description: 'A Nostr client for viewing and interacting with relay content.',
   });
 
@@ -232,8 +232,10 @@ const Index = () => {
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl sm:text-2xl font-bold truncate">Curator - A Nostr Relay Viewer</h1>
-            
+            <h1 className="flex items-center gap-2 text-xl sm:text-2xl font-bold truncate">
+              <Search className="h-5 w-5 text-primary flex-shrink-0" />
+              <span className="truncate">Curator</span>
+            </h1>
             <div className="flex items-center gap-2 sm:gap-4">
               {/* Login Area */}
               <LoginArea />
@@ -456,8 +458,10 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="border-t mt-12 py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>
+        <div className="container mx-auto px-4 text-sm text-muted-foreground">
+          <div className="flex items-center justify-center gap-2">
+            <span>Curator - A nostr relay viewer</span>
+            <span className="text-muted-foreground">•</span>
             <a
               href="https://github.com/bitkarrot/curator"
               target="_blank"
@@ -467,7 +471,7 @@ const Index = () => {
               <Github className="h-4 w-4" />
               <span>GitHub Source</span>
             </a>
-          </p>
+          </div>
         </div>
       </footer>
     </div>
@@ -475,3 +479,4 @@ const Index = () => {
 };
 
 export default Index;
+
