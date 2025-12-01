@@ -21,14 +21,39 @@ interface RelaySelectorProps {
   className?: string;
 }
 
-// Popular relays list
-const availableRelays = [
+type AvailableRelay = { name: string; url: string };
+
+// Popular relays list (default fallback)
+const defaultAvailableRelays: AvailableRelay[] = [
   { name: 'Swarm Hivetalk', url: 'wss://swarm.hivetalk.org' },
   { name: 'Beeswax Hivetalk', url: 'wss://beeswax.hivetalk.org' },
   { name: 'Nostr.NET', url: 'wss://relay.nostr.net' },
   { name: 'Damus', url: 'wss://relay.damus.io' },
   { name: 'Primal', url: 'wss://relay.primal.net' },
 ];
+
+// Load popular relays from Vite env (VITE_POPULAR_RELAYS) when available
+function getAvailableRelays(): AvailableRelay[] {
+  const envValue = (import.meta as any).env?.VITE_POPULAR_RELAYS as string | undefined;
+
+  if (!envValue) return defaultAvailableRelays;
+
+  try {
+    const parsed = JSON.parse(envValue);
+
+    if (!Array.isArray(parsed)) return defaultAvailableRelays;
+
+    const relays: AvailableRelay[] = parsed.filter((item: any) =>
+      item && typeof item.name === 'string' && typeof item.url === 'string'
+    );
+
+    return relays.length > 0 ? relays : defaultAvailableRelays;
+  } catch {
+    return defaultAvailableRelays;
+  }
+}
+
+const availableRelays = getAvailableRelays();
 
 export function RelaySelector({ className }: RelaySelectorProps) {
   const { config, updateConfig } = useAppContext();
