@@ -233,8 +233,11 @@ const Index = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="flex items-center gap-2 text-xl sm:text-2xl font-bold truncate">
-              <Search className="h-5 w-5 text-primary flex-shrink-0" />
-              <span className="truncate">Curator</span>
+            <Search
+              className="h-6 w-6 dark:text-accent text-primary flex-shrink-0"
+              strokeWidth={3.5}
+            />
+              <span className="truncate dark:text-primary"> Curator</span>
             </h1>
             <div className="flex items-center gap-2 sm:gap-4">
               {/* Login Area */}
@@ -460,7 +463,7 @@ const Index = () => {
       <footer className="border-t mt-12 py-6">
         <div className="container mx-auto px-4 text-sm text-muted-foreground">
           <div className="flex items-center justify-center gap-2">
-            <span>Curator - A nostr relay viewer</span>
+            <span>Curator - A Nostr Relay Kind Viewer</span>
             <span className="text-muted-foreground">•</span>
             <a
               href="https://github.com/bitkarrot/curator"
