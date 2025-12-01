@@ -234,10 +234,10 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <h1 className="flex items-center gap-2 text-xl sm:text-2xl font-bold truncate">
             <Search
-              className="h-6 w-6 dark:text-accent text-primary flex-shrink-0"
+              className="h-7 w-7 dark:text-accent text-primary flex-shrink-0"
               strokeWidth={3.5}
             />
-              <span className="truncate dark:text-primary"> Curator</span>
+              <span className="truncate dark:text-primary"> Curator.hivetalk.org</span>
             </h1>
             <div className="flex items-center gap-2 sm:gap-4">
               {/* Login Area */}
