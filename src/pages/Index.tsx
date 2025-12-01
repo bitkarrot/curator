@@ -458,14 +458,14 @@ const Index = () => {
       <footer className="border-t mt-12 py-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <p>
-            Vibed with{' '}
+            GitHub Source:{' '}
             <a
-              href="https://soapbox.pub/mkstack"
+              href="https://github.com/bitkarrot/curator"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              MKStack
+              github.com/bitkarrot/curator
             </a>
           </p>
         </div>
