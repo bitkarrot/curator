@@ -261,7 +261,7 @@ const Index = () => {
                     <Search className="h-4 w-4 mr-2" />
                     Search
                   </Button>
-                  <Button onClick={() => loadEvents()} disabled={loading} variant="outline" className="flex-1 sm:flex-none">
+                  <Button onClick={() => loadEvents()} disabled={loading} variant="outline" className="border-2 border-primary flex-1 sm:flex-none">
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Refresh
                   </Button>
@@ -280,7 +280,7 @@ const Index = () => {
                 </DialogTrigger>
                 <DialogContent className="mx-4 max-w-lg">
                   <DialogHeader>
-                    <DialogTitle>Create New Note</DialogTitle>
+                    <DialogTitle>Create New Kind 1 Note</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <Textarea
