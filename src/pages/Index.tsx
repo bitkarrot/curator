@@ -465,6 +465,10 @@ const Index = () => {
           <div className="flex items-center justify-center gap-2">
             <span>Curator - A Nostr Relay Kind Viewer</span>
             <span className="text-muted-foreground">•</span>
+            <span className="text-primary">
+              <a href="https://hivetalk.org">
+              Hivetalk</a></span>
+            <span className="text-muted-foreground">•</span>
             <a
               href="https://github.com/bitkarrot/curator"
               target="_blank"
