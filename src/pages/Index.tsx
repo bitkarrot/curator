@@ -254,7 +254,7 @@ const Index = () => {
                   placeholder="Enter kind number (e.g., 1)"
                   value={searchKind}
                   onChange={(e) => setSearchKind(e.target.value)}
-                  className="w-full sm:max-w-xs"
+                  className="w-full sm:max-w-xs border-2 border-primary focus-visible:ring-2 focus-visible:ring-accent"
                 />
                 <div className="flex gap-2">
                   <Button onClick={handleSearch} disabled={loading} className="flex-1 sm:flex-none">
