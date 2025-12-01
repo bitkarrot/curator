@@ -322,7 +322,7 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">from relay:</span>
-            <Badge variant="outline" className="truncate max-w-[200px] sm:max-w-none">{currentRelay}</Badge>
+            <Badge variant="secondary" className="truncate max-w-[200px] sm:max-w-none text-base font-semibold px-3 py-1">{currentRelay}</Badge>
           </div>
         </div>
 
