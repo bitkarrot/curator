@@ -36,6 +36,7 @@ const defaultConfig: AppConfig = {
   relayMetadata: {
     relays: [
       { url: 'wss://swarm.hivetalk.org', read: true, write: true },
+      { url: 'wss://beeswax.hivetalk.org', read: true, write: true },
       { url: 'wss://nos.lol', read: true, write: true },
       { url: 'wss://relay.nostr.band', read: true, write: true },
       { url: 'wss://relay.damus.io', read: true, write: true },
