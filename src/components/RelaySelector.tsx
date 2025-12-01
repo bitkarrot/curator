@@ -23,7 +23,8 @@ interface RelaySelectorProps {
 
 // Popular relays list
 const availableRelays = [
-  { name: 'HiveTalk', url: 'wss://swarm.hivetalk.org' },
+  { name: 'Swarm Hivetalk', url: 'wss://swarm.hivetalk.org' },
+  { name: 'Beeswax Hivetalk', url: 'wss://beeswax.hivetalk.org' },
   { name: 'Nostr.NET', url: 'wss://relay.nostr.net' },
   { name: 'Damus', url: 'wss://relay.damus.io' },
   { name: 'Primal', url: 'wss://relay.primal.net' },
