@@ -34,7 +34,7 @@ const defaultAvailableRelays: AvailableRelay[] = [
 
 // Load popular relays from Vite env (VITE_POPULAR_RELAYS) when available
 function getAvailableRelays(): AvailableRelay[] {
-  const envValue = (import.meta as any).env?.VITE_POPULAR_RELAYS as string | undefined;
+  const envValue = import.meta.env.VITE_POPULAR_RELAYS;
 
   if (!envValue) return defaultAvailableRelays;
 
