@@ -14,7 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Eye, Trash2, RefreshCw } from 'lucide-react';
+import { Search, Plus, Eye, Trash2, RefreshCw, Github } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import type { NostrEvent } from '@nostrify/nostrify';
 
@@ -458,14 +458,14 @@ const Index = () => {
       <footer className="border-t mt-12 py-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <p>
-            GitHub Source:{' '}
             <a
               href="https://github.com/bitkarrot/curator"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="inline-flex items-center gap-1 text-primary hover:underline"
             >
-              github.com/bitkarrot/curator
+              <Github className="h-4 w-4" />
+              <span>GitHub Source</span>
             </a>
           </p>
         </div>
