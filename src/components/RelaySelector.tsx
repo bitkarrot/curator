@@ -60,7 +60,7 @@ export function RelaySelector({ className }: RelaySelectorProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
-  const currentRelayUrl = config.relayMetadata.relays[0]?.url || 'wss://beeswax.hivetalk.org';
+  const currentRelayUrl = config.relayMetadata.relays[0]?.url || 'wss://swarm.hivetalk.org';
   const selectedOption = availableRelays.find((option) => option.url === currentRelayUrl);
 
   // Function to normalize relay URL by adding wss:// if no protocol is present

@@ -37,19 +37,7 @@ const Index = () => {
   const [searchKind, setSearchKind] = useState<string>('1');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newNoteContent, setNewNoteContent] = useState('');
-  const [deletedEventIds, setDeletedEventIds] = useState<Set<string>>(() => {
-    try {
-      const stored = localStorage.getItem('curator-deleted-events');
-      return stored ? new Set(JSON.parse(stored)) : new Set();
-    } catch {
-      return new Set();
-    }
-  });
-
-  // Persist deleted events to localStorage
-  useEffect(() => {
-    localStorage.setItem('curator-deleted-events', JSON.stringify([...deletedEventIds]));
-  }, [deletedEventIds]);
+  const [deletedEventIds, setDeletedEventIds] = useState<Set<string>>(new Set());
   
   const currentRelay = config.relayMetadata.relays[0]?.url || 'wss://swarm.hivetalk.org';
   const [limit] = useState(50);
@@ -65,30 +53,74 @@ const Index = () => {
     
     setLoading(true);
     try {
-      const filter = {
-        kinds: [parseInt(kindFilter)],
-        limit,
-        ...(loadMore && until ? { until } : {}),
-      };
+      // Query both target events AND kind 5 deletion events (simplified, no caching)
+      const filters = [
+        {
+          kinds: [parseInt(kindFilter)],
+          limit,
+          ...(loadMore && until ? { until } : {}),
+        },
+        {
+          kinds: [5], // Query deletion events
+          limit: 50, // Limited to last 50
+        }
+      ];
 
-      const eventIterator = nostr.req([filter], { relays: [currentRelay] });
+      const eventIterator = nostr.req(filters, { relays: [currentRelay] });
       const newEvents: NostrEvent[] = [];
+      const deletionEvents: NostrEvent[] = [];
       
       for await (const msg of eventIterator) {
         if (msg[0] === 'EVENT') {
-          newEvents.push(msg[2]);
+          const event = msg[2];
+          if (event.kind === 5) {
+            deletionEvents.push(event);
+            // If we're specifically searching for Kind 5, also add to newEvents for display
+            if (parseInt(kindFilter) === 5) {
+              newEvents.push(event);
+            }
+          } else {
+            newEvents.push(event);
+          }
         }
         if (msg[0] === 'EOSE') {
           break;
         }
       }
 
+      // Build set of deleted event IDs from kind 5 events
+      const relayDeletedEventIds = new Set<string>();
+      deletionEvents.forEach(deleteEvent => {
+        deleteEvent.tags.forEach(tag => {
+          if (tag[0] === 'e' && tag[1]) {
+            relayDeletedEventIds.add(tag[1]);
+          }
+        });
+      });
+
+      if (deletionEvents.length > 0) {
+        console.log(`Found ${deletionEvents.length} deletion events on relay: ${currentRelay}`);
+      }
+
       // Sort by created_at descending
       newEvents.sort((a, b) => b.created_at - a.created_at);
 
-      // Filter out locally deleted events
-      const filteredEvents = newEvents.filter(event => !deletedEventIds.has(event.id));
-      console.log(`Filtered out ${newEvents.length - filteredEvents.length} locally deleted events`);
+      // Filter out deleted events ONLY if we're not searching for Kind 5 events
+      const filteredEvents = parseInt(kindFilter) === 5 
+        ? newEvents // Don't filter Kind 5 events when specifically searching for them
+        : newEvents.filter(event => 
+            !deletedEventIds.has(event.id) && !relayDeletedEventIds.has(event.id)
+          );
+      
+      const filteredCount = newEvents.length - filteredEvents.length;
+      if (filteredCount > 0) {
+        console.log(`Filtered out ${filteredCount} deleted events`);
+      }
+
+      // Update deleted events (no persistence to localStorage)
+      if (relayDeletedEventIds.size > 0) {
+        setDeletedEventIds(relayDeletedEventIds);
+      }
 
       if (loadMore) {
         setEvents(prev => [...prev, ...filteredEvents]);
@@ -164,13 +196,56 @@ const Index = () => {
 
     try {
       publishEvent(deleteEventData, {
-        onSuccess: (signedEvent) => {
+        onSuccess: async (signedEvent) => {
           console.log('✅ Delete event signed and published successfully:', signedEvent);
           console.log('Signed event ID:', signedEvent.id);
           console.log('Signed event pubkey:', signedEvent.pubkey);
           console.log('Signed event signature:', signedEvent.sig);
           
-          // Track deleted event ID locally for persistence
+          // Verify that the relay actually accepted the deletion event
+          try {
+            console.log('🔍 Verifying deletion event was accepted by relay...');
+            const verificationIterator = nostr.req([{
+              kinds: [5],
+              ids: [signedEvent.id],
+              limit: 1
+            }], { relays: [currentRelay] });
+
+            let deletionEventFound = false;
+            for await (const msg of verificationIterator) {
+              if (msg[0] === 'EVENT' && msg[2].id === signedEvent.id) {
+                deletionEventFound = true;
+                console.log('✅ Deletion event confirmed on relay:', msg[2]);
+                break;
+              }
+              if (msg[0] === 'EOSE') {
+                break;
+              }
+            }
+
+            if (deletionEventFound) {
+              console.log('✅ Relay accepted the deletion event');
+              toast({
+                title: 'Success',
+                description: 'Event deleted! Deletion confirmed by relay.',
+              });
+            } else {
+              console.warn('⚠️ Deletion event not found on relay - may have been rejected');
+              toast({
+                title: 'Warning',
+                description: 'Deletion sent but not confirmed by relay. Event hidden locally only.',
+                variant: 'destructive',
+              });
+            }
+          } catch (verificationError) {
+            console.error('❌ Failed to verify deletion on relay:', verificationError);
+            toast({
+              title: 'Warning', 
+              description: 'Deletion sent but verification failed. Event hidden locally.',
+            });
+          }
+          
+          // Track deleted event ID (session only, no localStorage)
           setDeletedEventIds(prev => {
             const newSet = new Set([...prev, eventId]);
             console.log(`Added event ${eventId} to deleted list. Total deleted: ${newSet.size}`);
@@ -182,10 +257,6 @@ const Index = () => {
             const filtered = prevEvents.filter(e => e.id !== eventId);
             console.log(`Removed event from local state. Events before: ${prevEvents.length}, after: ${filtered.length}`);
             return filtered;
-          });
-          toast({
-            title: 'Success',
-            description: 'Event deleted! Kind 5 deletion event sent to relay and event hidden locally.',
           });
         },
         onError: (error) => {
@@ -224,7 +295,8 @@ const Index = () => {
 
   useEffect(() => {
     loadEvents();
-  }, [kindFilter, currentRelay, loadEvents]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kindFilter, currentRelay]); // Intentionally omitting loadEvents to prevent circular dependency
 
   return (
     <div className="min-h-screen bg-background">

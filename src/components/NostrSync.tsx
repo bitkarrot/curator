@@ -38,12 +38,12 @@ export function NostrSync() {
                 write: !marker || marker === 'write',
               }));
 
-            // Ensure beeswax.hivetalk.org is always the primary relay
-            const defaultRelay = { url: 'wss://beeswax.hivetalk.org', read: true, write: true };
-            const otherRelays = fetchedRelays.filter(r => r.url !== 'wss://beeswax.hivetalk.org');
+            // Ensure swarm.hivetalk.org is always the primary relay
+            const defaultRelay = { url: 'wss://swarm.hivetalk.org', read: true, write: true };
+            const otherRelays = fetchedRelays.filter(r => r.url !== 'wss://swarm.hivetalk.org');
             const finalRelays = [defaultRelay, ...otherRelays];
             
-            console.log('Syncing relay list from Nostr with beeswax.hivetalk.org as primary:', finalRelays);
+            console.log('Syncing relay list from Nostr with swarm.hivetalk.org as primary:', finalRelays);
             
             updateConfig((current) => ({
               ...current,
@@ -56,8 +56,8 @@ export function NostrSync() {
         } else {
           // No relay list found, ensure we have the default relay
           console.log('No relay list found in Nostr, ensuring default relay is set');
-          if (!config.relayMetadata.relays.some(r => r.url === 'wss://beeswax.hivetalk.org')) {
-            const defaultRelay = { url: 'wss://beeswax.hivetalk.org', read: true, write: true };
+          if (!config.relayMetadata.relays.some(r => r.url === 'wss://swarm.hivetalk.org')) {
+            const defaultRelay = { url: 'wss://swarm.hivetalk.org', read: true, write: true };
             updateConfig((current) => ({
               ...current,
               relayMetadata: {

@@ -112,7 +112,6 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
             const keysToRemove = [
               'nostr:login',
               'nostr:app-config-v2',
-              'curator-deleted-events',
               'nwc-connections',
               'nwc-active-connection',
               'signup_completed'
