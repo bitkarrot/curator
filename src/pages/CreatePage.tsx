@@ -103,14 +103,14 @@ const CreatePage = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                 <User className="h-5 w-5 text-primary" />
               </div>
-              <div>
-                <p className="font-medium">
-                  {user.pubkey.substring(0, 16)}...{user.pubkey.substring(user.pubkey.length - 8)}
+              <div className="min-w-0 flex-1">
+                <p className="font-medium break-all text-sm sm:text-base">
+                  {user.pubkey.substring(0, 12)}...{user.pubkey.substring(user.pubkey.length - 6)}
                 </p>
-                <p className="text-sm text-muted-foreground">Your public key</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Your public key</p>
               </div>
             </div>
           </CardContent>
@@ -136,7 +136,7 @@ const CreatePage = () => {
                 onChange={(e) => setNoteContent(e.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={8}
-                className="resize-none"
+                className="resize-none text-sm sm:text-base"
               />
               <p className="text-xs text-muted-foreground mt-2">
                 Tip: Press Cmd/Ctrl + Enter to publish quickly
@@ -153,10 +153,10 @@ const CreatePage = () => {
               </div>
 
               {/* Character Count */}
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs sm:text-sm text-muted-foreground">
                 <span>Characters: {noteContent.length}</span>
                 {noteContent.length > 280 && (
-                  <span className="text-amber-600">
+                  <span className="text-amber-600 text-xs sm:text-sm">
                     Long note - consider breaking into multiple posts
                   </span>
                 )}

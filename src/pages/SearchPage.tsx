@@ -303,7 +303,7 @@ const SearchPage = () => {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">from relay:</span>
-          <Badge variant="secondary" className="truncate max-w-[200px] sm:max-w-none text-base font-semibold px-3 py-1">{currentRelay}</Badge>
+            <Badge variant="secondary" className="truncate max-w-[150px] sm:max-w-none text-xs sm:text-base font-semibold px-2 sm:px-3 py-1 break-all">{currentRelay}</Badge>
         </div>
       </div>
 
@@ -341,12 +341,12 @@ const SearchPage = () => {
                             <Eye className="h-4 w-4" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="mx-4 max-w-2xl max-h-[80vh] overflow-auto">
+                        <DialogContent className="mx-2 sm:mx-4 w-[95vw] sm:max-w-2xl max-h-[85vh] overflow-hidden">
                           <DialogHeader>
-                            <DialogTitle>Raw Event Data</DialogTitle>
+                            <DialogTitle className="text-base sm:text-lg">Raw Event Data</DialogTitle>
                           </DialogHeader>
-                          <div className="space-y-4">
-                            <pre className="bg-muted p-2 sm:p-4 rounded-md text-xs overflow-auto max-h-[60vh]">
+                          <div className="space-y-4 overflow-hidden">
+                            <pre className="bg-muted p-2 sm:p-4 rounded-md text-xs overflow-auto max-h-[65vh] whitespace-pre-wrap break-all">
                               {JSON.stringify(event, null, 2)}
                             </pre>
                           </div>
@@ -391,23 +391,23 @@ const SearchPage = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm whitespace-pre-wrap">
+                  <p className="text-sm whitespace-pre-wrap break-words overflow-wrap-anywhere">
                     {truncateContent(event.content)}
                   </p>
                   {event.tags.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-1">
-                      {event.tags.slice(0, 5).map((tag, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {tag[0]}: {tag[1]?.substring(0, 20)}
-                          {tag[1]?.length > 20 ? '...' : ''}
-                        </Badge>
-                      ))}
+                        {event.tags.slice(0, 5).map((tag, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs break-all">
+                            {tag[0]}: {tag[1]?.substring(0, 15)}
+                            {tag[1]?.length > 15 ? '...' : ''}
+                          </Badge>
+                        ))}
                       {event.tags.length > 5 && (
                         <Badge variant="secondary" className="text-xs">
                           +{event.tags.length - 5} more
                         </Badge>
                       )}
-                    </div>
+                  </div>
                   )}
                 </CardContent>
               </Card>
