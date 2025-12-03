@@ -63,17 +63,43 @@ export function RelaySelector({ className }: RelaySelectorProps) {
   const currentRelayUrl = config.relayMetadata.relays[0]?.url || 'wss://swarm.hivetalk.org';
   const selectedOption = availableRelays.find((option) => option.url === currentRelayUrl);
 
-  // Function to normalize relay URL by adding wss:// if no protocol is present
+  // Function to normalize relay URL - only add wss:// if no protocol is present and it's not localhost
   const normalizeRelayUrl = (url: string): string => {
     const trimmed = url.trim();
     if (!trimmed) return trimmed;
     
-    // Check if it already has a protocol
+    // If it already has a protocol, return as-is
     if (trimmed.includes('://')) {
       return trimmed;
     }
     
-    // Add wss:// prefix
+    // For localhost or IP addresses, don't auto-add protocol - let user specify
+    if (trimmed.startsWith('localhost') || trimmed.match(/^\d+\.\d+\.\d+\.\d+/)) {
+      // If user types localhost:3777 without protocol, they probably want ws://
+      // But we'll let them be explicit about it
+      return trimmed;
+    }
+    
+    // For regular domains, add wss:// prefix
+    return `wss://${trimmed}`;
+  };
+
+  // Function to display what URL will be used (for preview purposes)
+  const getDisplayUrl = (url: string): string => {
+    const trimmed = url.trim();
+    if (!trimmed) return trimmed;
+    
+    // If it already has a protocol or looks like it's being typed, show as-is
+    if (trimmed.includes('://') || trimmed.startsWith('ws:') || trimmed.startsWith('wss:') || trimmed.startsWith('http:') || trimmed.startsWith('https:')) {
+      return trimmed;
+    }
+    
+    // For localhost or IP addresses without protocol, show as-is (user needs to add protocol)
+    if (trimmed.startsWith('localhost') || trimmed.match(/^\d+\.\d+\.\d+\.\d+/)) {
+      return trimmed;
+    }
+    
+    // For regular domains, show with wss:// prefix
     return `wss://${trimmed}`;
   };
 
@@ -105,7 +131,22 @@ export function RelaySelector({ className }: RelaySelectorProps) {
     const trimmed = value.trim();
     if (!trimmed) return false;
     
-    // Basic validation - should contain at least a domain-like structure
+    // If it already has a protocol, validate directly
+    if (trimmed.includes('://')) {
+      try {
+        new URL(trimmed);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    
+    // For localhost or IP addresses without protocol, they need to specify the full URL
+    if (trimmed.startsWith('localhost') || trimmed.match(/^\d+\.\d+\.\d+\.\d+/)) {
+      return false; // Require full URL with protocol for localhost/IP
+    }
+    
+    // For regular domains, try with wss:// prefix
     const normalized = normalizeRelayUrl(trimmed);
     try {
       new URL(normalized);
@@ -141,7 +182,7 @@ export function RelaySelector({ className }: RelaySelectorProps) {
       <PopoverContent className="w-[300px] p-0">
         <Command>
           <CommandInput 
-            placeholder="Search relays or type URL..." 
+            placeholder="Search relays or type full URL (e.g., ws://localhost:3777)" 
             value={inputValue}
             onValueChange={setInputValue}
           />
@@ -156,13 +197,13 @@ export function RelaySelector({ className }: RelaySelectorProps) {
                   <div className="flex flex-col">
                     <span className="font-medium">Add custom relay</span>
                     <span className="text-xs text-muted-foreground">
-                      {normalizeRelayUrl(inputValue)}
+                      {getDisplayUrl(inputValue)}
                     </span>
                   </div>
                 </CommandItem>
               ) : (
                 <div className="py-6 text-center text-sm text-muted-foreground">
-                  {inputValue ? "Invalid relay URL" : "No relay found."}
+                  {inputValue ? "Invalid relay URL. Use full URL (e.g., ws://localhost:3777)" : "No relay found."}
                 </div>
               )}
             </CommandEmpty>
@@ -202,7 +243,7 @@ export function RelaySelector({ className }: RelaySelectorProps) {
                   <div className="flex flex-col">
                     <span className="font-medium">Add custom relay</span>
                     <span className="text-xs text-muted-foreground">
-                      {normalizeRelayUrl(inputValue)}
+                      {getDisplayUrl(inputValue)}
                     </span>
                   </div>
                 </CommandItem>
