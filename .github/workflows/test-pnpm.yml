@@ -26,10 +26,8 @@ jobs:
         with:
           version: 8
           
-      - name: Clean install dependencies
-        run: |
-          rm -rf node_modules pnpm-lock.yaml
-          pnpm install
+      - name: Install dependencies
+        run: pnpm install
           
       - name: Run tests
         run: pnpm test
