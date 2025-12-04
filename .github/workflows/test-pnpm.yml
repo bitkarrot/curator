@@ -1,4 +1,4 @@
-name: Test
+name: Test (pnpm)
 
 on:
   push:
@@ -20,15 +20,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          registry-url: 'https://registry.npmjs.org'
           
-      - name: Configure JSR registry
-        run: npm config set @jsr:registry https://npm.jsr.io
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
           
       - name: Clean install dependencies
         run: |
-          rm -rf node_modules package-lock.json
-          npm install
+          rm -rf node_modules pnpm-lock.yaml
+          pnpm install
           
       - name: Run tests
-        run: npm run test
+        run: pnpm test
