@@ -43,8 +43,11 @@ function getAvailableRelays(): AvailableRelay[] {
 
     if (!Array.isArray(parsed)) return defaultAvailableRelays;
 
-    const relays: AvailableRelay[] = parsed.filter((item: any) =>
-      item && typeof item.name === 'string' && typeof item.url === 'string'
+    const relays: AvailableRelay[] = parsed.filter((item: unknown): item is AvailableRelay =>
+      typeof item === 'object' && item !== null && 
+      'name' in item && 'url' in item &&
+      typeof (item as AvailableRelay).name === 'string' && 
+      typeof (item as AvailableRelay).url === 'string'
     );
 
     return relays.length > 0 ? relays : defaultAvailableRelays;

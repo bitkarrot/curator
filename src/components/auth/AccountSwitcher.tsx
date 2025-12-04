@@ -1,7 +1,7 @@
 // NOTE: This file is stable and usually should not be modified.
 // It is important that all functionality in this file is preserved, and should only be modified if explicitly requested.
 
-import { ChevronDown, LogOut, UserIcon, UserPlus, User, Bell, Moon, Sun } from 'lucide-react';
+import { ChevronDown, LogOut, Moon, Sun } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,8 +20,8 @@ interface AccountSwitcherProps {
   onAddAccountClick: () => void;
 }
 
-export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
-  const { currentUser, otherUsers, setLogin, removeLogin } = useLoggedInAccounts();
+export function AccountSwitcher({ onAddAccountClick: _onAddAccountClick }: AccountSwitcherProps) {
+  const { currentUser, otherUsers: _otherUsers, setLogin: _setLogin, removeLogin } = useLoggedInAccounts();
   const { theme, setTheme } = useTheme();
 
   if (!currentUser) return null;

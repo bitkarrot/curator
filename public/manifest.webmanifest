@@ -1,0 +1,16 @@
+{
+  "name": "MKStack Curator",
+  "short_name": "Curator",
+  "description": "A Nostr client application built with React and TailwindCSS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
