@@ -13,6 +13,7 @@ import { NostrLoginProvider } from '@nostrify/react/login';
 import { AppProvider } from '@/components/AppProvider';
 import { NWCProvider } from '@/contexts/NWCContext';
 import { AppConfig } from '@/contexts/AppContext';
+import { DEFAULT_RELAYS } from '@/lib/constants';
 import AppRouter from './AppRouter';
 
 const head = createHead({
@@ -34,13 +35,7 @@ const queryClient = new QueryClient({
 const defaultConfig: AppConfig = {
   theme: "dark",
   relayMetadata: {
-    relays: [
-      { url: 'wss://swarm.hivetalk.org', read: true, write: true },
-      { url: 'wss://beeswax.hivetalk.org', read: true, write: true },
-      { url: 'wss://nos.lol', read: true, write: true },
-      { url: 'wss://relay.nostr.band', read: true, write: true },
-      { url: 'wss://relay.damus.io', read: true, write: true },
-    ],
+    relays: DEFAULT_RELAYS,
     updatedAt: 0,
   },
   publishMode: 'current',

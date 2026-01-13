@@ -1,5 +1,6 @@
 import { Check, ChevronsUpDown, Wifi, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, normalizeRelayUrl } from "@/lib/utils";
+import { DEFAULT_RELAYS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -24,13 +25,7 @@ interface RelaySelectorProps {
 type AvailableRelay = { name: string; url: string };
 
 // Popular relays list (default fallback)
-const defaultAvailableRelays: AvailableRelay[] = [
-  { name: 'Swarm Hivetalk', url: 'wss://swarm.hivetalk.org' },
-  { name: 'Beeswax Hivetalk', url: 'wss://beeswax.hivetalk.org' },
-  { name: 'Nostr.NET', url: 'wss://relay.nostr.net' },
-  { name: 'Damus', url: 'wss://relay.damus.io' },
-  { name: 'Primal', url: 'wss://relay.primal.net' },
-];
+const defaultAvailableRelays: AvailableRelay[] = DEFAULT_RELAYS;
 
 // Load popular relays from Vite env (VITE_POPULAR_RELAYS) when available
 function getAvailableRelays(): AvailableRelay[] {
@@ -44,9 +39,9 @@ function getAvailableRelays(): AvailableRelay[] {
     if (!Array.isArray(parsed)) return defaultAvailableRelays;
 
     const relays: AvailableRelay[] = parsed.filter((item: unknown): item is AvailableRelay =>
-      typeof item === 'object' && item !== null && 
+      typeof item === 'object' && item !== null &&
       'name' in item && 'url' in item &&
-      typeof (item as AvailableRelay).name === 'string' && 
+      typeof (item as AvailableRelay).name === 'string' &&
       typeof (item as AvailableRelay).url === 'string'
     );
 
@@ -66,42 +61,23 @@ export function RelaySelector({ className }: RelaySelectorProps) {
   const currentRelayUrl = config.relayMetadata.relays[0]?.url || 'wss://swarm.hivetalk.org';
   const selectedOption = availableRelays.find((option) => option.url === currentRelayUrl);
 
-  // Function to normalize relay URL - only add wss:// if no protocol is present and it's not localhost
-  const normalizeRelayUrl = (url: string): string => {
-    const trimmed = url.trim();
-    if (!trimmed) return trimmed;
-    
-    // If it already has a protocol, return as-is
-    if (trimmed.includes('://')) {
-      return trimmed;
-    }
-    
-    // For localhost or IP addresses, don't auto-add protocol - let user specify
-    if (trimmed.startsWith('localhost') || trimmed.match(/^\d+\.\d+\.\d+\.\d+/)) {
-      // If user types localhost:3777 without protocol, they probably want ws://
-      // But we'll let them be explicit about it
-      return trimmed;
-    }
-    
-    // For regular domains, add wss:// prefix
-    return `wss://${trimmed}`;
-  };
+
 
   // Function to display what URL will be used (for preview purposes)
   const getDisplayUrl = (url: string): string => {
     const trimmed = url.trim();
     if (!trimmed) return trimmed;
-    
+
     // If it already has a protocol or looks like it's being typed, show as-is
     if (trimmed.includes('://') || trimmed.startsWith('ws:') || trimmed.startsWith('wss:') || trimmed.startsWith('http:') || trimmed.startsWith('https:')) {
       return trimmed;
     }
-    
+
     // For localhost or IP addresses without protocol, show as-is (user needs to add protocol)
     if (trimmed.startsWith('localhost') || trimmed.match(/^\d+\.\d+\.\d+\.\d+/)) {
       return trimmed;
     }
-    
+
     // For regular domains, show with wss:// prefix
     return `wss://${trimmed}`;
   };
@@ -112,9 +88,9 @@ export function RelaySelector({ className }: RelaySelectorProps) {
     if (normalizedUrl) {
       // Update the config to move selected relay to the front
       const existingRelays = config.relayMetadata.relays.filter(r => r.url !== normalizedUrl);
-      const selectedRelay = config.relayMetadata.relays.find(r => r.url === normalizedUrl) || 
-                           { url: normalizedUrl, read: true, write: true };
-      
+      const selectedRelay = config.relayMetadata.relays.find(r => r.url === normalizedUrl) ||
+        { url: normalizedUrl, read: true, write: true };
+
       updateConfig(current => ({
         ...current,
         relayMetadata: {
@@ -123,7 +99,7 @@ export function RelaySelector({ className }: RelaySelectorProps) {
           updatedAt: Date.now(),
         },
       }));
-      
+
       setOpen(false);
       setInputValue("");
     }
@@ -133,7 +109,7 @@ export function RelaySelector({ className }: RelaySelectorProps) {
   const isValidRelayInput = (value: string): boolean => {
     const trimmed = value.trim();
     if (!trimmed) return false;
-    
+
     // If it already has a protocol, validate directly
     if (trimmed.includes('://')) {
       try {
@@ -143,12 +119,12 @@ export function RelaySelector({ className }: RelaySelectorProps) {
         return false;
       }
     }
-    
+
     // For localhost or IP addresses without protocol, they need to specify the full URL
     if (trimmed.startsWith('localhost') || trimmed.match(/^\d+\.\d+\.\d+\.\d+/)) {
       return false; // Require full URL with protocol for localhost/IP
     }
-    
+
     // For regular domains, try with wss:// prefix
     const normalized = normalizeRelayUrl(trimmed);
     try {
@@ -171,9 +147,9 @@ export function RelaySelector({ className }: RelaySelectorProps) {
           <div className="flex items-center gap-2">
             <Wifi className="h-4 w-4" />
             <span className="truncate">
-              {selectedOption 
-                ? selectedOption.name 
-                : currentRelayUrl 
+              {selectedOption
+                ? selectedOption.name
+                : currentRelayUrl
                   ? currentRelayUrl.replace(/^wss?:\/\//, '')
                   : "Select relay..."
               }
@@ -184,8 +160,8 @@ export function RelaySelector({ className }: RelaySelectorProps) {
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0">
         <Command>
-          <CommandInput 
-            placeholder="Search relays or type full URL (e.g., ws://localhost:3777)" 
+          <CommandInput
+            placeholder="Search relays or type full URL (e.g., ws://localhost:3777)"
             value={inputValue}
             onValueChange={setInputValue}
           />
@@ -212,8 +188,8 @@ export function RelaySelector({ className }: RelaySelectorProps) {
             </CommandEmpty>
             <CommandGroup>
               {availableRelays
-                .filter((option) => 
-                  !inputValue || 
+                .filter((option) =>
+                  !inputValue ||
                   option.name.toLowerCase().includes(inputValue.toLowerCase()) ||
                   option.url.toLowerCase().includes(inputValue.toLowerCase())
                 )
