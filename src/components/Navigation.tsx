@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, RefreshCw } from 'lucide-react';
 import { LoginArea } from '@/components/auth/LoginArea';
 import { cn } from '@/lib/utils';
 
@@ -12,6 +12,12 @@ export function Navigation() {
       label: 'Search',
       icon: Search,
       description: 'Browse and search events'
+    },
+    {
+      path: '/sync',
+      label: 'Sync',
+      icon: RefreshCw,
+      description: 'Sync notes between relays'
     },
     {
       path: '/create',
@@ -40,7 +46,7 @@ export function Navigation() {
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
-                
+
                 return (
                   <Link
                     key={item.path}
@@ -72,7 +78,7 @@ export function Navigation() {
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
-            
+
             return (
               <Link
                 key={item.path}
