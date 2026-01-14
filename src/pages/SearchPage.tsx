@@ -15,6 +15,8 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Eye, Trash2, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { RelaySelector } from '@/components/RelaySelector';
+import { NoteDetailDialog } from '@/components/NoteDetailDialog';
+import { RelaySeenOnButton } from '@/components/RelaySeenOnButton';
 import type { NostrEvent } from '@nostrify/nostrify';
 
 const SearchPage = () => {
@@ -29,6 +31,7 @@ const SearchPage = () => {
   const [kindFilter, setKindFilter] = useState<string>('1');
   const [searchKind, setSearchKind] = useState<string>('1');
   const [deletedEventIds, setDeletedEventIds] = useState<Set<string>>(new Set());
+  const [selectedEvent, setSelectedEvent] = useState<NostrEvent | null>(null);
 
   const currentRelay = config.relayMetadata.relays[0]?.url || 'wss://swarm.hivetalk.org';
   const [limit] = useState(50);
@@ -322,7 +325,11 @@ const SearchPage = () => {
           ) : (
             <>
               {events.map((event) => (
-                <Card key={event.id} className="hover:shadow-md transition-shadow">
+                <Card
+                  key={event.id}
+                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => setSelectedEvent(event)}
+                >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
@@ -331,13 +338,15 @@ const SearchPage = () => {
                           {formatDate(event.created_at)}
                         </p>
                       </div>
-                      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                         <Badge variant="outline">Kind {event.kind}</Badge>
+                        <RelaySeenOnButton event={event} currentRelay={currentRelay} />
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button
                               variant="ghost"
                               size="sm"
+                              title="View raw JSON"
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -413,6 +422,14 @@ const SearchPage = () => {
                   </CardContent>
                 </Card>
               ))}
+
+              {/* Note Detail Dialog */}
+              <NoteDetailDialog
+                event={selectedEvent}
+                open={selectedEvent !== null}
+                onOpenChange={(open) => !open && setSelectedEvent(null)}
+                currentRelay={currentRelay}
+              />
 
               {/* Load More Button */}
               {events.length >= limit && (
