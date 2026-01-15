@@ -108,15 +108,17 @@ export function NoteContent({
               <NostrMention key={`mention-${keyCounter++}`} pubkey={pubkey} />
             );
           } else {
-            // For other types, just show as a link
+            // For other types, redirect to an external gateway like njump.me
             parts.push(
-              <Link
+              <a
                 key={`nostr-${keyCounter++}`}
-                to={`/${nostrId}`}
+                href={`https://njump.me/${nostrId}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-blue-500 hover:underline"
               >
                 {fullMatch}
-              </Link>
+              </a>
             );
           }
         } catch {
@@ -168,8 +170,10 @@ function NostrMention({ pubkey }: { pubkey: string }) {
   const displayName = author.data?.metadata?.name ?? genUserName(pubkey);
 
   return (
-    <Link
-      to={`/${npub}`}
+    <a
+      href={`https://njump.me/${npub}`}
+      target="_blank"
+      rel="noopener noreferrer"
       className={cn(
         "font-medium hover:underline",
         hasRealName
@@ -178,6 +182,6 @@ function NostrMention({ pubkey }: { pubkey: string }) {
       )}
     >
       @{displayName}
-    </Link>
+    </a>
   );
 }

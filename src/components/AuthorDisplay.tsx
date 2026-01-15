@@ -11,7 +11,7 @@ interface AuthorDisplayProps {
 
 export function AuthorDisplay({ pubkey, showLink = true, size = 'md', className = '' }: AuthorDisplayProps) {
   const { data: authorData, isLoading } = useAuthor(pubkey);
-  
+
   const sizeClasses = {
     sm: 'h-8 w-8',
     md: 'h-10 w-10',
@@ -24,26 +24,26 @@ export function AuthorDisplay({ pubkey, showLink = true, size = 'md', className 
     lg: 'text-lg'
   };
 
-  const displayName = authorData?.metadata?.name || 
-                     authorData?.metadata?.display_name || 
-                     `${pubkey.substring(0, 8)}...${pubkey.substring(pubkey.length - 4)}`;
-  
+  const displayName = authorData?.metadata?.name ||
+    authorData?.metadata?.display_name ||
+    `${pubkey.substring(0, 8)}...${pubkey.substring(pubkey.length - 4)}`;
+
   const avatarUrl = authorData?.metadata?.picture;
-  
+
   // Generate fallback initials from display name or pubkey
-  const fallbackText = authorData?.metadata?.name 
+  const fallbackText = authorData?.metadata?.name
     ? authorData.metadata.name.substring(0, 2).toUpperCase()
     : pubkey.substring(0, 2).toUpperCase();
 
   const npub = nip19.npubEncode(pubkey);
-  const profileUrl = `https://nostr.at/${npub}`;
+  const profileUrl = `https://njump.me/${npub}`;
 
   const content = (
     <div className={`flex items-center gap-2 ${className}`}>
       <Avatar className={sizeClasses[size]}>
         {avatarUrl && (
-          <AvatarImage 
-            src={avatarUrl} 
+          <AvatarImage
+            src={avatarUrl}
             alt={displayName}
             onError={(e) => {
               // Hide broken images
@@ -55,7 +55,7 @@ export function AuthorDisplay({ pubkey, showLink = true, size = 'md', className 
           {isLoading ? '...' : fallbackText}
         </AvatarFallback>
       </Avatar>
-      
+
       <div className="flex-1 min-w-0">
         <div className={`font-medium truncate ${textSizeClasses[size]}`}>
           {displayName}
