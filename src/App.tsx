@@ -38,6 +38,7 @@ const defaultConfig: AppConfig = {
     relays: DEFAULT_RELAYS,
     updatedAt: 0,
   },
+  selectedRelayUrl: DEFAULT_RELAYS[0].url,
   publishMode: 'current',
 };
 

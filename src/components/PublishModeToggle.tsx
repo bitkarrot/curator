@@ -4,11 +4,11 @@ import { useAppContext } from "@/hooks/useAppContext";
 
 export function PublishModeToggle() {
   const { config, updateConfig } = useAppContext();
-  
+
   const isCurrentMode = config.publishMode === 'current';
-  const currentRelay = config.relayMetadata.relays[0]?.url || '';
+  const currentRelay = config.selectedRelayUrl || config.relayMetadata.relays[0]?.url || '';
   const writeRelayCount = config.relayMetadata.relays.filter(r => r.write).length;
-  
+
   const handleToggle = (checked: boolean) => {
     updateConfig(current => ({
       ...current,

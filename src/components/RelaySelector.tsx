@@ -58,15 +58,21 @@ export function RelaySelector({ className }: RelaySelectorProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
-  // Combine curated relays with user-configured relays from settings/sync
+  // Combine user-managed relays with curated ones
+  const configuredRelays = config.relayMetadata.relays.map(r => ({
+    name: r.url.replace(/^wss?:\/\//, ''),
+    url: r.url,
+    isConfigured: true
+  }));
+
   const combinedRelays = [
-    ...availableRelays,
-    ...config.relayMetadata.relays
-      .filter(r => !availableRelays.some(a => a.url === r.url))
-      .map(r => ({ name: r.url.replace(/^wss?:\/\//, ''), url: r.url }))
+    ...configuredRelays,
+    ...availableRelays
+      .filter(r => !configuredRelays.some(c => c.url === r.url))
+      .map(r => ({ ...r, isConfigured: false }))
   ];
 
-  const currentRelayUrl = config.relayMetadata.relays[0]?.url || 'wss://relay.damus.io';
+  const currentRelayUrl = config.selectedRelayUrl || config.relayMetadata.relays[0]?.url || 'wss://relay.damus.io';
   const selectedOption = combinedRelays.find((option) => option.url === currentRelayUrl);
 
 
@@ -94,19 +100,26 @@ export function RelaySelector({ className }: RelaySelectorProps) {
   const handleSelectRelay = (url: string) => {
     const normalizedUrl = normalizeRelayUrl(url);
     if (normalizedUrl) {
-      // Update the config to move selected relay to the front
-      const existingRelays = config.relayMetadata.relays.filter(r => r.url !== normalizedUrl);
-      const selectedRelay = config.relayMetadata.relays.find(r => r.url === normalizedUrl) ||
-        { url: normalizedUrl, read: true, write: true };
+      // Check if this relay is already in our configured list
+      const isAlreadyConfigured = config.relayMetadata.relays.some(r => r.url === normalizedUrl);
 
-      updateConfig(current => ({
-        ...current,
-        relayMetadata: {
-          ...current.relayMetadata!,
-          relays: [selectedRelay, ...existingRelays],
-          updatedAt: Date.now(),
-        },
-      }));
+      updateConfig(current => {
+        const nextConfig = {
+          ...current,
+          selectedRelayUrl: normalizedUrl,
+        };
+
+        // If it's a new relay, add it to the list too
+        if (!isAlreadyConfigured) {
+          nextConfig.relayMetadata = {
+            ...current.relayMetadata!,
+            relays: [...current.relayMetadata!.relays, { url: normalizedUrl, read: true, write: true }],
+            updatedAt: Date.now(),
+          };
+        }
+
+        return nextConfig;
+      });
 
       setOpen(false);
       setInputValue("");
