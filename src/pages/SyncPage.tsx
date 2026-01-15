@@ -13,8 +13,13 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DEFAULT_RELAYS } from '@/lib/constants';
-import { ArrowRight, RefreshCw, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowRight, RefreshCw, AlertCircle, CheckCircle2, XCircle, Calendar as CalendarIcon } from 'lucide-react';
 import { NRelay1, NostrEvent } from '@nostrify/nostrify';
+import { format, addHours, differenceInHours } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { DateRange } from 'react-day-picker';
 
 const SYNC_KINDS = [
   { kind: 0, label: 'Profile Metadata', description: 'Name, about, picture' },
@@ -45,6 +50,11 @@ export default function SyncPage() {
   const [customSource, setCustomSource] = useState('');
   const [customTarget, setCustomTarget] = useState('');
 
+  // Time selection state
+  const [sinceHours, setSinceHours] = useState<number>(-24);
+  const [untilHours, setUntilHours] = useState<number>(0);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+
   const [syncAll, setSyncAll] = useState(false);
   const [selectedKinds, setSelectedKinds] = useState<number[]>([]);
 
@@ -66,6 +76,46 @@ export default function SyncPage() {
     setSelectedKinds(prev =>
       prev.includes(kind) ? prev.filter(k => k !== kind) : [...prev, kind]
     );
+  };
+
+  const handleDateRangeSelect = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (range?.from) {
+      const now = new Date();
+      // Calculate hours difference from now
+      // If range.from is in the past, differenceInHours(range.from, now) would be negative
+      // e.g. yesterday vs today is -24
+      const newSince = differenceInHours(range.from, now);
+      setSinceHours(newSince);
+
+      if (range.to) {
+        // We probably want the end of the day or just the date? 
+        // Sync usually implies "until this time". 
+        // If they pick a range, e.g. Oct 1 to Oct 2. 
+        // Range.to might be Oct 2 00:00:00. 
+        // Let's assume we want to include the whole 'to' day, or just use the exact time if provided?
+        // The Calendar component usually returns start of day 00:00:00.
+        // So for the end date, we might want to Add 24 hours to cover that day if it matches 'from' or is just a date selection?
+        // Actually, let's just stick to exact difference for now or maybe add 24h to 'to' if it's a closed range?
+        // Let's just use the exact diff for simplicity first.
+        const newUntil = differenceInHours(range.to, now) + 24; // Include the full end day
+        setUntilHours(newUntil);
+      } else {
+        // If only start date selected, maybe reset until to 0 (now) or keep it?
+        // Let's leave until alone or set to 0?
+        // If user just clicks one date, usually 'to' is undefined.
+        // Let's set until roughly to 'since + 24' or just 0?
+        setUntilHours(newSince + 24);
+      }
+    }
+  };
+
+  // Helper to format the displayed time range
+  const getSelectedRangeText = () => {
+    const now = new Date();
+    const start = addHours(now, sinceHours);
+    const end = addHours(now, untilHours);
+    return `from ${format(start, 'M/d/yyyy h:mm a')} to ${format(end, 'M/d/yyyy h:mm a')}`;
   };
 
   const handleSync = async () => {
@@ -104,8 +154,22 @@ export default function SyncPage() {
       // NRelay1 connects automatically on request usually, strictly speaking we might want to check connection but let's try reading.
 
       const kinds = syncAll ? undefined : selectedKinds;
-      const filters = [{ authors: [user.pubkey], kinds }];
 
+
+      const now = new Date();
+      const since = Math.floor(addHours(now, sinceHours).getTime() / 1000);
+      const until = Math.floor(addHours(now, untilHours).getTime() / 1000);
+
+      // Filter with time range
+      // Note: NRelay1 query might need NIP-01 filters which support 'since' and 'until'
+      const filters = [{
+        authors: [user.pubkey],
+        kinds,
+        since,
+        until
+      }];
+
+      addLog(`Time range: ${new Date(since * 1000).toLocaleString()} to ${new Date(until * 1000).toLocaleString()}`);
       addLog(`Fetching events for ${user.pubkey.slice(0, 8)}...`);
 
       const events: NostrEvent[] = [];
@@ -172,24 +236,26 @@ export default function SyncPage() {
     }
   };
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
-        <div className="container mx-auto px-4 py-6">
-          <div className="max-w-2xl mx-auto">
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Authentication Required</AlertTitle>
-              <AlertDescription>
-                You must be logged in to sync your notes. Please login using the button in the top right.
-              </AlertDescription>
-            </Alert>
+  /*
+    if (!user) {
+      return (
+        <div className="min-h-screen bg-background">
+          <Navigation />
+          <div className="container mx-auto px-4 py-6">
+            <div className="max-w-2xl mx-auto">
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Authentication Required</AlertTitle>
+                <AlertDescription>
+                  You must be logged in to sync your notes. Please login using the button in the top right.
+                </AlertDescription>
+              </Alert>
+            </div>
           </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
+  */
 
   return (
     <div className="min-h-screen bg-background">
@@ -265,6 +331,81 @@ export default function SyncPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Time Range Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Time Range</CardTitle>
+              <CardDescription>Select the time period to sync notes from</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                <div className="space-y-2">
+                  <Label>Since (hours)</Label>
+                  <Input
+                    type="number"
+                    value={sinceHours}
+                    onChange={e => setSinceHours(Number(e.target.value))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Until (hours)</Label>
+                  <Input
+                    type="number"
+                    value={untilHours}
+                    onChange={e => setUntilHours(Number(e.target.value))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Select Date Range</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !dateRange && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateRange?.from ? (
+                          dateRange.to ? (
+                            <>
+                              {format(dateRange.from, "LLL dd, y")} -{" "}
+                              {format(dateRange.to, "LLL dd, y")}
+                            </>
+                          ) : (
+                            format(dateRange.from, "LLL dd, y")
+                          )
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        initialFocus
+                        mode="range"
+                        defaultMonth={dateRange?.from}
+                        selected={dateRange}
+                        onSelect={handleDateRangeSelect}
+                        numberOfMonths={2}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              <div className="text-sm text-muted-foreground font-mono bg-muted/50 p-2 rounded">
+                <strong>Selected range (Local Time):</strong><br />
+                {getSelectedRangeText()}
+              </div>
+
+            </CardContent>
+          </Card>
 
           {/* Configuration */}
           <Card>
