@@ -12,11 +12,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Eye, Trash2, RefreshCw } from 'lucide-react';
+import { Search, Eye, Trash2, RefreshCw, Check, ChevronsUpDown, X } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { RelaySelector } from '@/components/RelaySelector';
 import { NoteDetailDialog } from '@/components/NoteDetailDialog';
 import { RelaySeenOnButton } from '@/components/RelaySeenOnButton';
+
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
+import { nip19 } from 'nostr-tools';
 import type { NostrEvent } from '@nostrify/nostrify';
 
 const SearchPage = () => {
@@ -32,6 +38,11 @@ const SearchPage = () => {
   const [searchKind, setSearchKind] = useState<string>('1');
   const [deletedEventIds, setDeletedEventIds] = useState<Set<string>>(new Set());
   const [selectedEvent, setSelectedEvent] = useState<NostrEvent | null>(null);
+
+  // Author filtering state
+  // Author filtering state
+  const [selectedFeedAuthors, setSelectedFeedAuthors] = useState<Set<string>>(new Set());
+  const [openAuthorSelect, setOpenAuthorSelect] = useState(false);
 
   const currentRelay = config.relayMetadata.relays[0]?.url || 'wss://swarm.hivetalk.org';
   const [limit] = useState(50);
@@ -52,6 +63,7 @@ const SearchPage = () => {
         {
           kinds: [parseInt(kindFilter)],
           limit,
+          ...(selectedFeedAuthors.size > 0 ? { authors: Array.from(selectedFeedAuthors) } : {}),
           ...(loadMore && until ? { until } : {}),
         },
         {
@@ -135,12 +147,25 @@ const SearchPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentRelay, kindFilter, limit, until, nostr, toast, deletedEventIds]);
+  }, [currentRelay, kindFilter, limit, until, nostr, toast, deletedEventIds, selectedFeedAuthors]);
 
   const handleSearch = () => {
     setKindFilter(searchKind);
     setUntil(undefined);
+    setEvents([]);
   };
+
+  // Derive unique authors from current events for the dropdown
+  const availableAuthors = events.reduce((acc, event) => {
+    if (!acc.has(event.pubkey)) {
+      acc.set(event.pubkey, {
+        pubkey: event.pubkey,
+        // We could look up profile metadata here if we had it, for now just use pubkey
+        display: nip19.npubEncode(event.pubkey).substring(0, 12) + '...'
+      });
+    }
+    return acc;
+  }, new Map<string, { pubkey: string, display: string }>());
 
   const handleDeleteEvent = async (eventId: string) => {
     if (!user) {
@@ -261,7 +286,7 @@ const SearchPage = () => {
   useEffect(() => {
     loadEvents();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kindFilter, currentRelay]); // Intentionally omitting loadEvents to prevent circular dependency
+  }, [kindFilter, currentRelay, selectedFeedAuthors]); // Auto-refresh when filters change
 
   return (
     <div className="min-h-screen bg-background">
@@ -269,29 +294,123 @@ const SearchPage = () => {
       <div className="container mx-auto px-4 py-6">
         {/* Search Section */}
         <div className="mb-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">Search by Kind Number</label>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <Input
-                  type="number"
-                  placeholder="Enter kind number (e.g., 1)"
-                  value={searchKind}
-                  onChange={(e) => setSearchKind(e.target.value)}
-                  className="w-full sm:max-w-xs border-2 border-primary focus-visible:ring-2 focus-visible:ring-accent"
-                />
-                <div className="flex gap-2">
-                  <Button onClick={handleSearch} disabled={loading} className="flex-1 sm:flex-none">
-                    <Search className="h-4 w-4 mr-2" />
-                    Search
-                  </Button>
-                  <Button onClick={() => loadEvents()} disabled={loading} variant="outline" className="border-2 border-primary flex-1 sm:flex-none">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh
-                  </Button>
+          <div className="flex flex-col gap-6">
+            {/* Top Row: Kind Search & Actions */}
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-2 block">Search by Kind Number</label>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Input
+                    type="number"
+                    placeholder="Enter kind number (e.g., 1)"
+                    value={searchKind}
+                    onChange={(e) => setSearchKind(e.target.value)}
+                    className="w-full sm:max-w-xs border-2 border-primary focus-visible:ring-2 focus-visible:ring-accent"
+                  />
+                  <div className="flex gap-2">
+                    <Button onClick={handleSearch} disabled={loading} className="flex-1 sm:flex-none">
+                      <Search className="h-4 w-4 mr-2" />
+                      Search
+                    </Button>
+                    <Button onClick={() => loadEvents()} disabled={loading} variant="outline" className="border-2 border-primary flex-1 sm:flex-none">
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Refresh
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Author Filter Section */}
+            <Card>
+              <CardContent className="py-3 px-4 space-y-4">
+
+
+
+
+                {/* Feed Author Selector */}
+                <div className="space-y-2">
+                  <Label>Select from Feed Authors</Label>
+                  <Popover open={openAuthorSelect} onOpenChange={setOpenAuthorSelect}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={openAuthorSelect}
+                        className="w-full justify-between"
+                      >
+                        {selectedFeedAuthors.size > 0
+                          ? `${selectedFeedAuthors.size} authors selected`
+                          : "Select authors from current feed..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[300px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Search authors..." />
+                        <CommandList>
+                          <CommandEmpty>No authors found in current view.</CommandEmpty>
+                          <CommandGroup>
+                            {Array.from(availableAuthors.values()).map((author) => (
+                              <CommandItem
+                                key={author.pubkey}
+                                value={author.pubkey}
+                                onSelect={(currentValue) => {
+                                  setSelectedFeedAuthors(prev => {
+                                    const next = new Set(prev);
+                                    if (next.has(currentValue)) {
+                                      next.delete(currentValue);
+                                    } else {
+                                      next.add(currentValue);
+                                    }
+                                    return next;
+                                  });
+                                }}
+                              >
+                                <div className="flex items-center gap-2 w-full overflow-hidden">
+                                  <Check
+                                    className={cn(
+                                      "h-4 w-4 shrink-0",
+                                      selectedFeedAuthors.has(author.pubkey) ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  <AuthorDisplay pubkey={author.pubkey} size="sm" showLink={false} className="flex-1" />
+                                </div>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Selected Tags Display */}
+                  {selectedFeedAuthors.size > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {Array.from(selectedFeedAuthors).map(pubkey => (
+                        <Badge key={pubkey} variant="secondary" className="pl-2 pr-1 py-1 flex items-center">
+                          <div className="flex items-center gap-1 max-w-[150px]">
+                            <AuthorDisplay pubkey={pubkey} size="sm" showLink={false} />
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 ml-1 rounded-full hover:bg-destructive/20"
+                            onClick={() => setSelectedFeedAuthors(prev => {
+                              const next = new Set(prev);
+                              next.delete(pubkey);
+                              return next;
+                            })}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
@@ -304,6 +423,12 @@ const SearchPage = () => {
               {events.length >= limit ? `of ${limit}+ events` : 'events'} of kind:
             </span>
             <Badge variant="secondary">{kindFilter}</Badge>
+            {selectedFeedAuthors.size > 0 && (
+              <>
+                <span className="text-sm text-muted-foreground ml-2">filtered by:</span>
+                <Badge variant="secondary">{selectedFeedAuthors.size} authors</Badge>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">from relay:</span>
