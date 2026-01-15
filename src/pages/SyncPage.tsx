@@ -34,6 +34,10 @@ const SYNC_KINDS = [
   { kind: 10015, label: 'Interests', description: 'Interests list' },
   { kind: 10030, label: 'Emoji Lists', description: 'Custom emojis' },
   { kind: 10050, label: 'DM Relays', description: 'Relays for DMs' },
+  { kind: 30000, label: 'Follow sets', description: 'Categorized follow lists' },
+  { kind: 30008, label: 'Profile Badges', description: 'Badge definition and usage' },
+  { kind: 30023, label: 'Long-form Content', description: 'Article/blog posts' },
+  { kind: 30024, label: 'Draft Long-form Content', description: 'Draft articles' },
 ];
 
 interface LogEntry {

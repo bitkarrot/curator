@@ -40,7 +40,6 @@ const SearchPage = () => {
   const [selectedEvent, setSelectedEvent] = useState<NostrEvent | null>(null);
 
   // Author filtering state
-  // Author filtering state
   const [selectedFeedAuthors, setSelectedFeedAuthors] = useState<Set<string>>(new Set());
   const [openAuthorSelect, setOpenAuthorSelect] = useState(false);
 
@@ -284,6 +283,8 @@ const SearchPage = () => {
   };
 
   useEffect(() => {
+    setUntil(undefined);
+    setEvents([]);
     loadEvents();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kindFilter, currentRelay, selectedFeedAuthors]); // Auto-refresh when filters change
