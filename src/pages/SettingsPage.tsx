@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trash2, Plus, Wifi, Check, AlertTriangle, GripVertical } from 'lucide-react';
+import { Trash2, Plus, Wifi, Check, AlertTriangle, GripVertical, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { normalizeRelayUrl } from '@/lib/utils';
 import { DEFAULT_RELAYS } from '@/lib/constants';
@@ -313,6 +313,52 @@ export default function SettingsPage() {
                     These relays are used to fetch your profile and settings.
                     Adding too many relays may slow down the application. We recommend keeping it under 5.
                   </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-2 border-primary/10 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl">Preferences</CardTitle>
+              <CardDescription>
+                Customize how the application handles external content.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-primary" />
+                  <Label htmlFor="gateway-url" className="text-base font-semibold">Preferred Nostr Gateway</Label>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  The external service used to view events, profiles, and notes that are not yet rendered locally.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[
+                    { name: 'njump.me', url: 'njump.me' },
+                    { name: 'nostr.at', url: 'nostr.at' },
+                    { name: 'nostr.ae', url: 'nostr.ae' },
+                    { name: 'nostr.eu', url: 'nostr.eu' },
+                  ].map((gateway) => (
+                    <Button
+                      key={gateway.url}
+                      variant={config.defaultGateway === gateway.url ? "default" : "outline"}
+                      className={`h-16 flex flex-col items-center justify-center gap-1 font-bold ${config.defaultGateway === gateway.url ? "border-2 border-primary" : "border-2"
+                        }`}
+                      onClick={() => {
+                        updateConfig(curr => ({ ...curr, defaultGateway: gateway.url }));
+                        toast({
+                          title: "Gateway updated",
+                          description: `Default gateway set to ${gateway.name}`,
+                        });
+                      }}
+                    >
+                      <span>{gateway.name}</span>
+                      {config.defaultGateway === gateway.url && (
+                        <Check className="h-3 w-3" />
+                      )}
+                    </Button>
+                  ))}
                 </div>
               </div>
             </CardContent>

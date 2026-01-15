@@ -5,6 +5,7 @@ import { nip19 } from 'nostr-tools';
 import { useAuthor } from '@/hooks/useAuthor';
 import { genUserName } from '@/lib/genUserName';
 import { cn } from '@/lib/utils';
+import { useAppContext } from '@/hooks/useAppContext';
 
 interface NoteContentProps {
   event: NostrEvent;
@@ -16,6 +17,9 @@ export function NoteContent({
   event,
   className,
 }: NoteContentProps) {
+  const { config } = useAppContext();
+  const gateway = config.defaultGateway || 'njump.me';
+
   // Process the content to render mentions, links, etc.
   const content = useMemo(() => {
     const text = event.content;
@@ -105,14 +109,14 @@ export function NoteContent({
           if (decoded.type === 'npub') {
             const pubkey = decoded.data;
             parts.push(
-              <NostrMention key={`mention-${keyCounter++}`} pubkey={pubkey} />
+              <NostrMention key={`mention-${keyCounter++}`} pubkey={pubkey} gateway={gateway} />
             );
           } else {
             // For other types, redirect to an external gateway like njump.me
             parts.push(
               <a
                 key={`nostr-${keyCounter++}`}
-                href={`https://njump.me/${nostrId}`}
+                href={`https://${gateway}/${nostrId}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline"
@@ -153,7 +157,7 @@ export function NoteContent({
     }
 
     return parts;
-  }, [event]);
+  }, [event, gateway]);
 
   return (
     <div className={cn("whitespace-pre-wrap break-words", className)}>
@@ -163,7 +167,7 @@ export function NoteContent({
 }
 
 // Helper component to display user mentions
-function NostrMention({ pubkey }: { pubkey: string }) {
+function NostrMention({ pubkey, gateway }: { pubkey: string, gateway: string }) {
   const author = useAuthor(pubkey);
   const npub = nip19.npubEncode(pubkey);
   const hasRealName = !!author.data?.metadata?.name;
@@ -171,7 +175,7 @@ function NostrMention({ pubkey }: { pubkey: string }) {
 
   return (
     <a
-      href={`https://njump.me/${npub}`}
+      href={`https://${gateway}/${npub}`}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(

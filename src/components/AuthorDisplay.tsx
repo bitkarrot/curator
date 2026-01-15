@@ -1,6 +1,7 @@
 import { useAuthor } from '@/hooks/useAuthor';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { nip19 } from 'nostr-tools';
+import { useAppContext } from '@/hooks/useAppContext';
 
 interface AuthorDisplayProps {
   pubkey: string;
@@ -11,6 +12,8 @@ interface AuthorDisplayProps {
 
 export function AuthorDisplay({ pubkey, showLink = true, size = 'md', className = '' }: AuthorDisplayProps) {
   const { data: authorData, isLoading } = useAuthor(pubkey);
+  const { config } = useAppContext();
+  const gateway = config.defaultGateway || 'njump.me';
 
   const sizeClasses = {
     sm: 'h-8 w-8',
@@ -36,7 +39,7 @@ export function AuthorDisplay({ pubkey, showLink = true, size = 'md', className 
     : pubkey.substring(0, 2).toUpperCase();
 
   const npub = nip19.npubEncode(pubkey);
-  const profileUrl = `https://njump.me/${npub}`;
+  const profileUrl = `https://${gateway}/${npub}`;
 
   const content = (
     <div className={`flex items-center gap-2 ${className}`}>

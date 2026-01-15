@@ -40,6 +40,7 @@ const defaultConfig: AppConfig = {
   },
   selectedRelayUrl: DEFAULT_RELAYS[0].url,
   publishMode: 'current',
+  defaultGateway: 'njump.me',
 };
 
 export function App() {

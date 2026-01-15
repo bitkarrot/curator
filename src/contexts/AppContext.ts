@@ -18,6 +18,8 @@ export interface AppConfig {
   selectedRelayUrl?: string;
   /** Publishing mode: 'all' publishes to all write relays, 'current' publishes only to selected relay */
   publishMode?: 'all' | 'current';
+  /** External Nostr gateway URL (e.g., 'njump.me', 'nostr.at') */
+  defaultGateway?: string;
 }
 
 export interface AppContextType {
