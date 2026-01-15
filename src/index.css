@@ -128,7 +128,7 @@
     --destructive: oklch(0.6702 0.1806 350.3599);
     --destructive-foreground: oklch(0.2820 0.0910 267.9350);
 
-    --border: oklch(0.3790 0.1460 265.5220);
+    --border: oklch(0.4880 0.2430 264.3760);
     --input: oklch(0.9620 0.0590 95.6170);
     --ring: oklch(0.4880 0.2430 264.3760);
     --sidebar-background: 240 5.9% 10%;
@@ -166,6 +166,7 @@
     --shadow-xl: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 1.00), 3px 8px 10px -1px hsl(206.1538 28.0576% 27.2549% / 1.00);
     --shadow-2xl: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 2.50);
   }
+
   .theme {
     --font-sans: Poppins, sans-serif;
     --font-mono: Fira Code, monospace;
@@ -177,6 +178,7 @@
     --tracking-wider: calc(var(--tracking-normal) + 0.05em);
     --tracking-widest: calc(var(--tracking-normal) + 0.1em);
   }
+
   body {
     letter-spacing: var(--tracking-normal);
   }
