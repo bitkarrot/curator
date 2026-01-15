@@ -58,8 +58,16 @@ export function RelaySelector({ className }: RelaySelectorProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
-  const currentRelayUrl = config.relayMetadata.relays[0]?.url || 'wss://swarm.hivetalk.org';
-  const selectedOption = availableRelays.find((option) => option.url === currentRelayUrl);
+  // Combine curated relays with user-configured relays from settings/sync
+  const combinedRelays = [
+    ...availableRelays,
+    ...config.relayMetadata.relays
+      .filter(r => !availableRelays.some(a => a.url === r.url))
+      .map(r => ({ name: r.url.replace(/^wss?:\/\//, ''), url: r.url }))
+  ];
+
+  const currentRelayUrl = config.relayMetadata.relays[0]?.url || 'wss://relay.damus.io';
+  const selectedOption = combinedRelays.find((option) => option.url === currentRelayUrl);
 
 
 
@@ -187,7 +195,7 @@ export function RelaySelector({ className }: RelaySelectorProps) {
               )}
             </CommandEmpty>
             <CommandGroup>
-              {availableRelays
+              {combinedRelays
                 .filter((option) =>
                   !inputValue ||
                   option.name.toLowerCase().includes(inputValue.toLowerCase()) ||

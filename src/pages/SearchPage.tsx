@@ -43,7 +43,7 @@ const SearchPage = () => {
   const [selectedFeedAuthors, setSelectedFeedAuthors] = useState<Set<string>>(new Set());
   const [openAuthorSelect, setOpenAuthorSelect] = useState(false);
 
-  const currentRelay = config.relayMetadata.relays[0]?.url || 'wss://swarm.hivetalk.org';
+  const currentRelay = config.relayMetadata.relays[0]?.url || 'wss://relay.damus.io';
   const [limit] = useState(50);
   const [until, setUntil] = useState<number | undefined>(undefined);
 

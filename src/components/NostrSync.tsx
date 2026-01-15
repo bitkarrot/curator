@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNostr } from '@nostrify/react';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useAppContext } from '@/hooks/useAppContext';
+import { DEFAULT_RELAYS } from '@/lib/constants';
 
 /**
  * NostrSync - Syncs user's Nostr data
@@ -38,30 +39,27 @@ export function NostrSync() {
                 write: !marker || marker === 'write',
               }));
 
-            // Ensure swarm.hivetalk.org is always the primary relay
-            const defaultRelay = { url: 'wss://swarm.hivetalk.org', read: true, write: true };
-            const otherRelays = fetchedRelays.filter(r => r.url !== 'wss://swarm.hivetalk.org');
-            const finalRelays = [defaultRelay, ...otherRelays];
-            
-            console.log('Syncing relay list from Nostr with swarm.hivetalk.org as primary:', finalRelays);
-            
-            updateConfig((current) => ({
-              ...current,
-              relayMetadata: {
-                relays: finalRelays,
-                updatedAt: event.created_at,
-              },
-            }));
+            if (fetchedRelays.length > 0) {
+              console.log('Syncing relay list from Nostr profile:', fetchedRelays);
+
+              updateConfig((current) => ({
+                ...current,
+                relayMetadata: {
+                  relays: fetchedRelays,
+                  updatedAt: event.created_at,
+                },
+              }));
+            }
           }
         } else {
-          // No relay list found, ensure we have the default relay
-          console.log('No relay list found in Nostr, ensuring default relay is set');
-          if (!config.relayMetadata.relays.some(r => r.url === 'wss://swarm.hivetalk.org')) {
-            const defaultRelay = { url: 'wss://swarm.hivetalk.org', read: true, write: true };
+          // No relay list found in profile, if we don't have any relays yet, use defaults
+          console.log('No relay list found in Nostr profile');
+          if (config.relayMetadata.relays.length === 0) {
+            console.log('Using default relays as fallback');
             updateConfig((current) => ({
               ...current,
               relayMetadata: {
-                relays: [defaultRelay, ...(current.relayMetadata?.relays || [])],
+                relays: DEFAULT_RELAYS,
                 updatedAt: current.relayMetadata?.updatedAt || 0,
               },
             }));

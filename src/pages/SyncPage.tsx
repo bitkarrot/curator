@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSeoMeta } from '@unhead/react';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAppContext } from '@/hooks/useAppContext';
 import { Navigation } from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -48,6 +49,7 @@ interface LogEntry {
 
 export default function SyncPage() {
   const { user } = useCurrentUser();
+  const { config } = useAppContext();
 
   const [sourceRelay, setSourceRelay] = useState<string>('');
   const [targetRelay, setTargetRelay] = useState<string>('');
@@ -275,9 +277,9 @@ export default function SyncPage() {
                     <SelectValue placeholder="Select a relay" />
                   </SelectTrigger>
                   <SelectContent>
-                    {DEFAULT_RELAYS.map(relay => (
+                    {config.relayMetadata.relays.map(relay => (
                       <SelectItem key={relay.url} value={relay.url}>
-                        {relay.name}
+                        {relay.url.replace(/^wss?:\/\//, '')}
                       </SelectItem>
                     ))}
                     <SelectItem value="custom">Custom URL...</SelectItem>
@@ -305,9 +307,9 @@ export default function SyncPage() {
                     <SelectValue placeholder="Select a relay" />
                   </SelectTrigger>
                   <SelectContent>
-                    {DEFAULT_RELAYS.map(relay => (
+                    {config.relayMetadata.relays.map(relay => (
                       <SelectItem key={relay.url} value={relay.url}>
-                        {relay.name}
+                        {relay.url.replace(/^wss?:\/\//, '')}
                       </SelectItem>
                     ))}
                     <SelectItem value="custom">Custom URL...</SelectItem>

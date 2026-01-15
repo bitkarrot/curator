@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Plus, RefreshCw } from 'lucide-react';
+import { Search, Plus, RefreshCw, Wifi } from 'lucide-react';
 import { LoginArea } from '@/components/auth/LoginArea';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +24,12 @@ export function Navigation() {
       label: 'Create',
       icon: Plus,
       description: 'Create new notes'
+    },
+    {
+      path: '/settings',
+      label: 'Settings',
+      icon: Wifi,
+      description: 'Manage settings and relays'
     }
   ];
 
