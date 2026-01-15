@@ -140,7 +140,7 @@ export default function SettingsPage() {
       relayMetadata: {
         ...current.relayMetadata,
         relays: [...(current.relayMetadata?.relays || []), { url: normalized, read: true, write: true }],
-        updatedAt: Date.now(),
+        updatedAt: Math.floor(Date.now() / 1000),
       },
     }));
 
@@ -159,7 +159,7 @@ export default function SettingsPage() {
         relayMetadata: {
           ...current.relayMetadata!,
           relays: nextRelays,
-          updatedAt: Date.now(),
+          updatedAt: Math.floor(Date.now() / 1000),
         },
       };
 
@@ -182,7 +182,7 @@ export default function SettingsPage() {
       relayMetadata: {
         ...current.relayMetadata!,
         relays: DEFAULT_RELAYS,
-        updatedAt: Date.now(),
+        updatedAt: Math.floor(Date.now() / 1000),
       },
       selectedRelayUrl: DEFAULT_RELAYS[0].url,
     }));
@@ -206,7 +206,7 @@ export default function SettingsPage() {
           relayMetadata: {
             ...current.relayMetadata,
             relays: arrayMove(relays, oldIndex, newIndex),
-            updatedAt: Date.now(),
+            updatedAt: Math.floor(Date.now() / 1000),
           },
         };
       });

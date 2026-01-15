@@ -114,7 +114,7 @@ export function RelaySelector({ className }: RelaySelectorProps) {
           nextConfig.relayMetadata = {
             ...current.relayMetadata!,
             relays: [...current.relayMetadata!.relays, { url: normalizedUrl, read: true, write: true }],
-            updatedAt: Date.now(),
+            updatedAt: Math.floor(Date.now() / 1000),
           };
         }
 
