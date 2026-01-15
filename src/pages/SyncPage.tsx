@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useSeoMeta } from '@unhead/react';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { Navigation } from '@/components/Navigation';
@@ -62,6 +62,13 @@ export default function SyncPage() {
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [stats, setStats] = useState({ fetched: 0, published: 0, errors: 0 });
+  const statusRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isSyncing && statusRef.current) {
+      statusRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [isSyncing]);
 
   useSeoMeta({
     title: 'Sync Notes - Curator',
@@ -236,26 +243,7 @@ export default function SyncPage() {
     }
   };
 
-  /*
-    if (!user) {
-      return (
-        <div className="min-h-screen bg-background">
-          <Navigation />
-          <div className="container mx-auto px-4 py-6">
-            <div className="max-w-2xl mx-auto">
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Authentication Required</AlertTitle>
-                <AlertDescription>
-                  You must be logged in to sync your notes. Please login using the button in the top right.
-                </AlertDescription>
-              </Alert>
-            </div>
-          </div>
-        </div>
-      );
-    }
-  */
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -460,12 +448,18 @@ export default function SyncPage() {
                 className="w-full md:w-auto md:min-w-[200px]"
                 size="lg"
                 onClick={handleSync}
-                disabled={isSyncing}
+                disabled={isSyncing || !user}
+                title={!user ? "Please login to sync" : "Start Sync"}
               >
                 {isSyncing ? (
                   <>
                     <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                     Syncing...
+                  </>
+                ) : !user ? (
+                  <>
+                    <XCircle className="mr-2 h-4 w-4" />
+                    Login Required
                   </>
                 ) : (
                   <>
@@ -480,7 +474,7 @@ export default function SyncPage() {
 
           {/* Terminal / Progress */}
           {(isSyncing || logs.length > 0) && (
-            <Card className="bg-slate-950 text-slate-50 border-slate-800">
+            <Card ref={statusRef} className="bg-slate-950 text-slate-50 border-slate-800">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-mono uppercase tracking-wider text-slate-400">Sync Status</CardTitle>
