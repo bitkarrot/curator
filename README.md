@@ -151,7 +151,7 @@ Make sure to configure your production environment variables (such as `VITE_POPU
 
 ## 🙌 Acknowledgements & Links
 
-Curator was originally scaffolded from the MKStack starter but is now its own focused application.
+Curator was originally scaffolded from the MKStack but is now its own focused application.
 
 - **Source code**: [https://github.com/bitkarrot/curator](https://github.com/bitkarrot/curator)
 

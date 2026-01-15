@@ -1,7 +1,7 @@
 {
-  "name": "MKStack Curator",
+  "name": "Curator",
   "short_name": "Curator",
-  "description": "A Nostr client application built with React and TailwindCSS",
+  "description": "A Nostr client application built for syncing and searching relay content",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
