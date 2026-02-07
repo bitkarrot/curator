@@ -14,6 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DEFAULT_RELAYS } from '@/lib/constants';
+import { Slider } from "@/components/ui/slider";
 import { ArrowRight, RefreshCw, AlertCircle, CheckCircle2, XCircle, Calendar as CalendarIcon } from 'lucide-react';
 import { NRelay1, NostrEvent } from '@nostrify/nostrify';
 import { format, addHours, differenceInHours } from 'date-fns';
@@ -63,6 +64,7 @@ export default function SyncPage() {
 
   const [syncAll, setSyncAll] = useState(false);
   const [selectedKinds, setSelectedKinds] = useState<number[]>([]);
+  const [syncDelay, setSyncDelay] = useState<number>(100); // Delay in ms
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -223,6 +225,12 @@ export default function SyncPage() {
 
       for (let i = 0; i < events.length; i++) {
         const event = events[i];
+
+        // Delay if configured
+        if (syncDelay > 0) {
+          await new Promise(resolve => setTimeout(resolve, syncDelay));
+        }
+
         try {
           await target.event(event);
           publishedCount++;
@@ -405,7 +413,7 @@ export default function SyncPage() {
           <Card>
             <CardHeader>
               <CardTitle>Sync Configuration</CardTitle>
-              <CardDescription>Select what you want to sync</CardDescription>
+              <CardDescription>Select what you want to sync and speed settings</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
 
@@ -420,6 +428,48 @@ export default function SyncPage() {
                   checked={syncAll}
                   onCheckedChange={setSyncAll}
                 />
+              </div>
+
+              <div className="space-y-4 border p-4 rounded-lg bg-card/50">
+                <div className="flex flex-col space-y-2">
+                  <Label className="text-base">Sync Speed</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Controls the delay between each event sent. Slower speeds prevent "Rate Limit" errors from strict relays.
+                  </p>
+                </div>
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center space-x-4">
+                    <span className="text-xs font-bold text-muted-foreground w-8 text-right">FAST</span>
+                    <Slider
+                      value={[syncDelay]}
+                      max={1000}
+                      step={50}
+                      onValueChange={(val) => setSyncDelay(val[0])}
+                      className="flex-1"
+                    />
+                    <span className="text-xs font-bold text-muted-foreground w-8">SLOW</span>
+
+                    <div className="w-24 font-mono text-sm text-right border p-1.5 rounded bg-background shadow-sm">
+                      {syncDelay} ms
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs">
+                    <span className={cn(
+                      "transition-colors font-medium",
+                      syncDelay === 0 ? "text-destructive" :
+                        syncDelay < 200 ? "text-amber-500" :
+                          "text-green-500"
+                    )}>
+                      {syncDelay === 0 ? "⚠️ No Delay (Highest Risk)" :
+                        syncDelay < 200 ? "⚡ Minimal Delay (Standard)" :
+                          "🛡️ Safe Mode (Recommended for Rate Limits)"}
+                    </span>
+                    <span className="text-muted-foreground">
+                      Approx. {syncDelay === 0 ? "100+" : Math.floor(1000 / Math.max(50, syncDelay))} events/sec
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {!syncAll && (
