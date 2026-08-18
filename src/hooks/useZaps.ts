@@ -201,13 +201,19 @@ export function useZaps(
         ? actualTarget
         : actualTarget.id;
 
-      const zapRequestParams = {
-        profile: actualTarget.pubkey,
-        event: eventParam,
-        amount: zapAmount,
-        relays: config.relayMetadata.relays.map(r => r.url),
-        comment
-      };
+      const zapRequestParams = eventParam
+        ? {
+            event: eventParam as NostrEvent,
+            amount: zapAmount,
+            relays: config.relayMetadata.relays.map(r => r.url),
+            comment
+          }
+        : {
+            pubkey: actualTarget.pubkey,
+            amount: zapAmount,
+            relays: config.relayMetadata.relays.map(r => r.url),
+            comment
+          };
 
       const zapRequest = nip57.makeZapRequest(zapRequestParams);
 
