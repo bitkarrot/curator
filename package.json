@@ -1,7 +1,7 @@
 {
   "name": "curator",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "scripts": {
     "dev": "npm i --silent && vite",
@@ -16,9 +16,9 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@fontsource-variable/inter": "^5.2.6",
     "@getalby/sdk": "^5.1.1",
-    "@hookform/resolvers": "^3.9.0",
-    "@nostrify/nostrify": "^0.47.1",
-    "@nostrify/react": "0.2.17",
+    "@hookform/resolvers": "^7.0.9",
+    "@nostrify/nostrify": "^0.55.1",
+    "@nostrify/react": "^0.6.8",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
@@ -71,7 +71,7 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.3",
-    "zod": "^3.25.71"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
@@ -85,27 +85,30 @@
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react-swc": "^4.3.3",
+    "@vitest/mocker": "^4.1.12",
     "@webbtc/webln-types": "^3.0.0",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
-    "happy-dom": "^20.0.10",
+    "happy-dom": "^21.0.4",
     "jsdom": "^26.1.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^8.2.1",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.12"
   },
   "overrides": {
-    "happy-dom": "^20.0.10"
+    "happy-dom": "^21.0.4",
+    "postcss-selector-parser": "^6.1.6"
   },
   "pnpm": {
     "overrides": {
-      "@nostrify/react>happy-dom": "20.0.11"
+      "happy-dom": "^21.0.4",
+      "postcss-selector-parser": "^6.1.6"
     }
   }
 }
